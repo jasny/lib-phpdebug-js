@@ -22,20 +22,20 @@ Usage
 Requirements
 ------------
 
-    * [node.js](http://nodejs.org/) & *npm*
-    * Webserver with *PHP* support
-	* [PHP 5.2+](http://php.net/) *cli* and *webserver* support
-	* [Xdebug](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
+  * [node.js](http://nodejs.org/) & *npm*
+  * Webserver with *PHP* support
+  * [PHP 5.2+](http://php.net/) *cli* and *webserver* support
+  * [Xdebug](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
 
 Install
 -------
 
     npm install connect socket.io cli q xml2js
-	git clone git://github.com/ajaxorg/lib-phpdebug.git
-	cd lib-phpdebug
-	git checkout dev
-	git submodule init
-	git submodule update
+    git clone git://github.com/ajaxorg/lib-phpdebug.git
+    cd lib-phpdebug
+    git checkout dev
+    git submodule init
+    git submodule update
 
 Setup
 -----
@@ -45,18 +45,18 @@ point it to `./php/`. This will be used to serve PHP scripts for the example cli
 
 Configure *Xdebug* in *php.ini*:
 
-	// TODO
+    // TODO
 
 Launch debug proxy server:
 
-	node ./example/server --port 9080 --php lib-phpdebug.localhost
+    node ./example/server --port 9080 --php lib-phpdebug.localhost
 
 Test
 ----
 
 The following will run a bunch of tests to cover all supported use-cases:
 
-	node ./test/all --port 9080 --php lib-phpdebug.localhost
+    node ./test/all --port 9080 --php lib-phpdebug.localhost
 
 If the example client is open at `http://localhost:9080/` it will show the progress of
 the tests.
