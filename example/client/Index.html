@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>JavaScript Xdebug Client</title>
+        <script src="socket.io/socket.io.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+        <script data-main="js/main" src="js/require.js"></script>
+        <style>
+            BODY {
+                font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+                font-size: 11px;
+            }
+            H3 {
+                font-size: 10px;
+            }
+            #clients {
+                font-size: 9px;
+                border: 1px solid black;
+                padding: 2px;
+                overflow-x: scroll;
+            }
+            DIV.client {
+                margin: 5px;
+                padding: 5px;
+                border: 2px solid black;
+                display: inline-block;
+                background-color: green;
+            }
+            DIV.session {
+                margin: 5px;
+                padding: 5px;
+                border: 1px dashed black;
+                display: inline-block;
+                width: 150px;
+                background-color: yellow;
+            }
+            DIV.event {
+                margin: 2px;
+                padding: 2px;
+                border: 1px solid black;
+                background-color: #ececec;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>JavaScript Xdebug Client</h1>
+        <p><a href="javascript:runTests();">Run All Tests</a></p>
+        <table>
+            <tr>
+                <td valign="top" width="100%">
+                    <div id="clients"></div>
+                </td>
+                <td valign="top">
+                    <iframe id="phpscripts" src="" width="200" height="400"></iframe>
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>
