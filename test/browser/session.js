@@ -36,25 +36,25 @@ define(function(require, exports, module)
 
         client.on("connect", function(data)
         {
-        	options.helpers.debugScript("HelloWorld", "session1");
+            options.helpers.debugScript("HelloWorld", "session1");
         });
 
-    	client.on("session", function(session)
-    	{
-    		session.on("end", function()
-    		{
-    			client.disconnect();
-    		});
-    		
-    		session.sendCommand("run");
-    	});
+        client.on("session", function(session)
+        {
+            session.on("end", function()
+            {
+                client.disconnect();
+            });
+            
+            session.sendCommand("run");
+        });
 
         client.on("disconnect", function(data)
         {
-    		callback(true);
+            callback(true);
         });
 
         client.connect();
-	}
+    }
 
 });

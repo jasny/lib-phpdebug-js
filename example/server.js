@@ -43,29 +43,29 @@
  */
 
 const XDEBUG_PORT = 9000,
-	  PROXY_PORT = 9080,
-	  PHP_VHOST = "lib-phpdebug.localhost";
+      PROXY_PORT = 9080,
+      PHP_VHOST = "lib-phpdebug.localhost";
 
 
 var SYS = require("sys"),
-	CLI = require("cli"),
-	Q = require("q"),
-	PATH = require("path"),
-	QS = require("querystring"),
-	CONNECT = require("connect"),
-	CONNECT_DISPATCH = require("../support/dispatch"),
-	SOCKET_IO = require("socket.io"),
-	XDEBUG = require("../lib/xdebug"),
-	XDEBUG_PROXY = require("../lib/proxy"),
-	EXEC = require('child_process').exec,
-	NET = require("net"),
-	XML2JS = require("xml2js");
+    CLI = require("cli"),
+    Q = require("q"),
+    PATH = require("path"),
+    QS = require("querystring"),
+    CONNECT = require("connect"),
+    CONNECT_DISPATCH = require("../support/dispatch"),
+    SOCKET_IO = require("socket.io"),
+    XDEBUG = require("../lib/xdebug"),
+    XDEBUG_PROXY = require("../lib/proxy"),
+    EXEC = require('child_process').exec,
+    NET = require("net"),
+    XML2JS = require("xml2js");
 
 
 var proxyServer = null,
-	browserTestClients = [],
-	browserTestIndex = 0,
-	runningBrowserTests = {};
+    browserTestClients = [],
+    browserTestIndex = 0,
+    runningBrowserTests = {};
 
 
 // See: https://github.com/chriso/cli/blob/master/examples/static.js
@@ -76,152 +76,152 @@ CLI.parse({
 
 CLI.main(function(args, options)
 {
-	startServer(options);
+    startServer(options);
 });
 
 
 function startServer(options)
 {
-	var app = CONNECT.createServer(
+    var app = CONNECT.createServer(
 
-		CONNECT_DISPATCH({
+        CONNECT_DISPATCH({
 
-			// Check if the server is running
-        	"/alive": function(req, res) {
-        		res.end("OK");
-          	},
+            // Check if the server is running
+            "/alive": function(req, res) {
+                res.end("OK");
+            },
 
-          	// Stop the server
-          	"/stop": function(req, res) {
-        		res.end("OK");
-        		process.exit(0);
-          	},
+            // Stop the server
+            "/stop": function(req, res) {
+                res.end("OK");
+                process.exit(0);
+            },
 
-          	// Run a browser client test. If no browser client connected
-          	// simulate a browser client by connecting one internally
-          	// for the duration of this test.
-          	"/run-browser-test": function(req, res) {
-          		try {
-              		Q.when(runBrowserTest(QS.parse(req.url.replace(/^[^\?]*\?/, "")).test), function() {
-                  		res.end(JSON.stringify({
-                  			success: true
-                  		}));
-              		}, function(e) {
-                  		res.end(JSON.stringify({
-                  			error: ""+e
-                  		}));
-              		});
-          		} catch(e) {
-              		res.end(JSON.stringify({
-              			error: ""+e
-              		}));
-          		}
-          	},
+            // Run a browser client test. If no browser client connected
+            // simulate a browser client by connecting one internally
+            // for the duration of this test.
+            "/run-browser-test": function(req, res) {
+                try {
+                    Q.when(runBrowserTest(QS.parse(req.url.replace(/^[^\?]*\?/, "")).test), function() {
+                        res.end(JSON.stringify({
+                            success: true
+                        }));
+                    }, function(e) {
+                        res.end(JSON.stringify({
+                            error: ""+e
+                        }));
+                    });
+                } catch(e) {
+                    res.end(JSON.stringify({
+                        error: ""+e
+                    }));
+                }
+            },
 
-          	"/.*": CONNECT.static(__dirname + '/client', { maxAge: 0 })
-		})
-	);
+            "/.*": CONNECT.static(__dirname + '/client', { maxAge: 0 })
+        })
+    );
 
-	var io = SOCKET_IO.listen(app);
+    var io = SOCKET_IO.listen(app);
 
-	// Initialize and hook in the debug proxy server so it can
-	// communicate via `socket.io`.
+    // Initialize and hook in the debug proxy server so it can
+    // communicate via `socket.io`.
 
-	proxyServer = new XDEBUG_PROXY.Server();
+    proxyServer = new XDEBUG_PROXY.Server();
 
-	proxyServer.listen(new XDEBUG.Client({
-		API: {
-			NET: NET,
-			XML2JS: XML2JS
-		},
-		xdebugPort: XDEBUG_PORT
-	}));
+    proxyServer.listen(new XDEBUG.Client({
+        API: {
+            NET: NET,
+            XML2JS: XML2JS
+        },
+        xdebugPort: XDEBUG_PORT
+    }));
 
-	proxyServer.hook({
-		socketIO: io
-	});
+    proxyServer.hook({
+        socketIO: io
+    });
 
-	// Hook in browser test system
-	io.of("/test").on("connection", function(socket)
-	{
-		browserTestClients.push(socket);
-		socket.on("disconnect", function()
-		{
-			for (var i=browserTestClients.length-1 ; i >= 0 ; i-- ) {
-				if (browserTestClients[i] === socket)
-					browserTestClients.splice(i, 1);
-			}
-		});
-		socket.on("run-result", function(data)
-		{
-			if (!runningBrowserTests["i:" + data.testIndex])
-				return;
-			if (data.success) {
-				runningBrowserTests["i:" + data.testIndex].resolve();
-			} else
-			if (data.error) {
-				runningBrowserTests["i:" + data.testIndex].reject("Browser test failed: " + data.error);
-			} else
-				throw new Error("Message data does not contain 'success' or 'error' key!");
-			delete runningBrowserTests["i:" + data.testIndex];
-		});
-		socket.on("run-tests", function(data)
-		{
-			var command = "node " +  PATH.normalize(__dirname + "/../test/all --port " + options.port + " --php " + options.php);
-			EXEC(command, function (error, stdout, stderr)
-		    {
-				SYS.puts("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
-		    });
-		});
-		socket.emit("init", {
-			phpHostname: options.php
-		});
-	});	
+    // Hook in browser test system
+    io.of("/test").on("connection", function(socket)
+    {
+        browserTestClients.push(socket);
+        socket.on("disconnect", function()
+        {
+            for (var i=browserTestClients.length-1 ; i >= 0 ; i-- ) {
+                if (browserTestClients[i] === socket)
+                    browserTestClients.splice(i, 1);
+            }
+        });
+        socket.on("run-result", function(data)
+        {
+            if (!runningBrowserTests["i:" + data.testIndex])
+                return;
+            if (data.success) {
+                runningBrowserTests["i:" + data.testIndex].resolve();
+            } else
+            if (data.error) {
+                runningBrowserTests["i:" + data.testIndex].reject("Browser test failed: " + data.error);
+            } else
+                throw new Error("Message data does not contain 'success' or 'error' key!");
+            delete runningBrowserTests["i:" + data.testIndex];
+        });
+        socket.on("run-tests", function(data)
+        {
+            var command = "node " +  PATH.normalize(__dirname + "/../test/all --port " + options.port + " --php " + options.php);
+            EXEC(command, function (error, stdout, stderr)
+            {
+                SYS.puts("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
+            });
+        });
+        socket.emit("init", {
+            phpHostname: options.php
+        });
+    }); 
 
-	app.listen(options.port);
+    app.listen(options.port);
 
-	SYS.puts("Launched Xdebug proxy server on port " + options.port + "\n");
+    SYS.puts("Launched Xdebug proxy server on port " + options.port + "\n");
 }
 
 function runBrowserTest(test)
 {
-	var result = Q.defer();
-	
-	// If a browser test client is connected we let it handle the test.
-	// NOTE: The FIRST connected test client is always used to execute the test.
-	if (browserTestClients.length > 0)
-	{
-		browserTestIndex++;
-		runningBrowserTests["i:" + browserTestIndex] = result;
-		browserTestClients[0].emit("run", { testIndex: browserTestIndex, test: test });
-		setTimeout(function() {
-			if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
-				delete runningBrowserTests["i:" + browserTestIndex];
-				result.reject("Browser test took too long to finish!");
-			}
-		}, 2000);
-	}
-	// If no browser test client connected we simulate a fake one
-	else
-	{
-		// Dynamically require the test module
-		require(PATH.normalize(__dirname + "/../test/browser/" + test)).run(XDEBUG, {
-			socketIO: proxyServer.fakeSocketClient()
-		}, function(status)
-		{
-			if (status === true) {
-				result.resolve();
-			} else {
-				result.reject(status);
-			}
-		});
+    var result = Q.defer();
+    
+    // If a browser test client is connected we let it handle the test.
+    // NOTE: The FIRST connected test client is always used to execute the test.
+    if (browserTestClients.length > 0)
+    {
+        browserTestIndex++;
+        runningBrowserTests["i:" + browserTestIndex] = result;
+        browserTestClients[0].emit("run", { testIndex: browserTestIndex, test: test });
+        setTimeout(function() {
+            if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
+                delete runningBrowserTests["i:" + browserTestIndex];
+                result.reject("Browser test took too long to finish!");
+            }
+        }, 2000);
+    }
+    // If no browser test client connected we simulate a fake one
+    else
+    {
+        // Dynamically require the test module
+        require(PATH.normalize(__dirname + "/../test/browser/" + test)).run(XDEBUG, {
+            socketIO: proxyServer.fakeSocketClient()
+        }, function(status)
+        {
+            if (status === true) {
+                result.resolve();
+            } else {
+                result.reject(status);
+            }
+        });
 
-		setTimeout(function() {
-			if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
-				result.reject("Browser test took too long to finish!");
-			}
-		}, 2000);
-	}
+        setTimeout(function() {
+            if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
+                result.reject("Browser test took too long to finish!");
+            }
+        }, 2000);
+    }
 
-	return result.promise;
+    return result.promise;
 }

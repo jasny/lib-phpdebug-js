@@ -28,9 +28,9 @@
  */
 
 var HELPER = require("./_helper"),
-	ASYNC = require("../support/asyncjs/index"),
-	ASSERT = require("assert"),
-	XDEBUG = require("../lib/xdebug");
+    ASYNC = require("../support/asyncjs/index"),
+    ASSERT = require("assert"),
+    XDEBUG = require("../lib/xdebug");
 
 // NOTE: `HELPER.endSuite();` **MUST** be called at the end of the **LAST** test case!
 
@@ -40,40 +40,40 @@ var Test =
     
     setUpSuite: function(next)
     {
-    	HELPER.startSuite(function() {
+        HELPER.startSuite(function() {
             next();
-    	});
+        });
     },
 /*
     "test serverConnection": function(next)
     {
-    	 var client = new XDEBUG.Client({
-    		 API: HELPER.getAPI(),
-    		 socketIO: HELPER.getSocketIO()
-    	 });
+         var client = new XDEBUG.Client({
+             API: HELPER.getAPI(),
+             socketIO: HELPER.getSocketIO()
+         });
 
-    	 client.on("connect", function()
-    	 {
-    		 client.disconnect();
-    	 });
+         client.on("connect", function()
+         {
+             client.disconnect();
+         });
 
-    	 client.on("disconnect", function()
-    	 {
-    		 next();
-    	 });
+         client.on("disconnect", function()
+         {
+             next();
+         });
 
-    	 client.connect();
+         client.connect();
     },
 */
     
     "test browserConnection": function(next)
     {
-    	HELPER.runBrowserTest("connection", function() {
-    		HELPER.endSuite(function()
+        HELPER.runBrowserTest("connection", function() {
+            HELPER.endSuite(function()
             {
-	            next();
-	    	});
-    	});
+                next();
+            });
+        });
     }
     
 }
@@ -81,6 +81,6 @@ var Test =
 module.exports = require("../support/asyncjs/lib/test").testcase(Test);
 
 if (module === require.main)
-	HELPER.ready(function() {
-		module.exports.exec();
-	});
+    HELPER.ready(function() {
+        module.exports.exec();
+    });

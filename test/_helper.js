@@ -39,14 +39,14 @@
  * 
  *   var HELPER = require("./_helper");
  *   HELPER.ready(function() {
- *   	// TODO: for each test suite
- *   	HELPER.startSuite(function()
- *   	{
- *   		// TODO: run test suite
- *   		HELPER.endSuite(function() {
- *   			// TODO: end test suite
- *   		});
- *   	});
+ *      // TODO: for each test suite
+ *      HELPER.startSuite(function()
+ *      {
+ *          // TODO: run test suite
+ *          HELPER.endSuite(function() {
+ *              // TODO: end test suite
+ *          });
+ *      });
  *   });
  *
  * External Dependencies:
@@ -59,220 +59,220 @@
  */
 
 const PROXY_PORT = 9080,
-	  PHP_VHOST = "lib-phpdebug.localhost",
-	  XDEBUG_PORT = 9000;
+      PHP_VHOST = "lib-phpdebug.localhost",
+      XDEBUG_PORT = 9000;
 
 
 var CLI = require("cli"),
-	Q = require("q"),
-	HTTP = require("http"),
-	PATH = require("path"),
-	EXEC = require("child_process").exec,
-	SYS = require("sys"),
-	ASSERT = require("assert"),
-	SOCKET_IO_CLIENT = require("socket.io-client"),
-	XML2JS = require("xml2js"),
-	NET = require("net");
+    Q = require("q"),
+    HTTP = require("http"),
+    PATH = require("path"),
+    EXEC = require("child_process").exec,
+    SYS = require("sys"),
+    ASSERT = require("assert"),
+    SOCKET_IO_CLIENT = require("socket.io-client"),
+    XML2JS = require("xml2js"),
+    NET = require("net");
 
 
 var suiteCount = 0,
-	serverInfo = {},
-	ourServer = false,	// if we started the debug proxy server
-	verboseServerLog = false;
+    serverInfo = {},
+    ourServer = false,  // if we started the debug proxy server
+    verboseServerLog = false;
 
 exports.getXdebugPort = function()
 {
-	return XDEBUG_PORT;
+    return XDEBUG_PORT;
 }
 
 exports.getAPI = function()
 {
-	return {
-		NET: NET,
-		XML2JS: XML2JS
-	}
+    return {
+        NET: NET,
+        XML2JS: XML2JS
+    }
 }
 
 exports.getSocketIO = function()
 {
-	throw new Error("socket.io-client currently does not run on nodejs. see: https://github.com/LearnBoost/socket.io-client/issues/208");
-	
-	return SOCKET_IO_CLIENT;
+    throw new Error("socket.io-client currently does not run on nodejs. see: https://github.com/LearnBoost/socket.io-client/issues/208");
+    
+    return SOCKET_IO_CLIENT;
 }
 
 exports.ready = function(callback)
 {
-	// See: https://github.com/chriso/cli/blob/master/examples/static.js
-	CLI.parse({
-	    port:  [false, 'Listen on this port', 'number', PROXY_PORT],
-	    php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST]
-	});
+    // See: https://github.com/chriso/cli/blob/master/examples/static.js
+    CLI.parse({
+        port:  [false, 'Listen on this port', 'number', PROXY_PORT],
+        php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST]
+    });
 
-	CLI.main(function(args, options)
-	{
-		serverInfo = options;
-		// Test connection to debug proxy server. If not running we start it.
-		Q.when(testConnection(), function ok() {
-			callback();
-		}, function error() {
-			Q.when(startServer(), function ok() {
-				callback();
-			}, function error(e) {
-				fatalExit("Error starting debug proxy server: " + e);
-			});
-		});
-	});
+    CLI.main(function(args, options)
+    {
+        serverInfo = options;
+        // Test connection to debug proxy server. If not running we start it.
+        Q.when(testConnection(), function ok() {
+            callback();
+        }, function error() {
+            Q.when(startServer(), function ok() {
+                callback();
+            }, function error(e) {
+                fatalExit("Error starting debug proxy server: " + e);
+            });
+        });
+    });
 }
 
 exports.startSuite = function(callback)
 {
-	suiteCount++;
-	callback();
+    suiteCount++;
+    callback();
 }
 
 exports.endSuite = function(callback)
 {
-	suiteCount--;
-	if (suiteCount === 0) {
-		Q.when(stopServer(), callback);
-	} else {
-		callback();
-	}
+    suiteCount--;
+    if (suiteCount === 0) {
+        Q.when(stopServer(), callback);
+    } else {
+        callback();
+    }
 }
 
 exports.fatalExit = function fatalExit(message)
 {
-	console.error(message);
-	process.exit(1);
+    console.error(message);
+    process.exit(1);
 }
 
 exports.runBrowserTest = function(test, callback)
 {
-	Q.when(runBrowserTest(test), callback, function(e)
-	{
-		console.error("[runBrowserTest] ERROR: " + e);
-		Q.when(stopServer(true), function()
-		{
-			// NOTE: This will throw and thus stop test suite from continuing
-			ASSERT.fail(false, true, ""+e);
-		});
-	});
+    Q.when(runBrowserTest(test), callback, function(e)
+    {
+        console.error("[runBrowserTest] ERROR: " + e);
+        Q.when(stopServer(true), function()
+        {
+            // NOTE: This will throw and thus stop test suite from continuing
+            ASSERT.fail(false, true, ""+e);
+        });
+    });
 }
 
 
 function testConnection()
 {
-	var result = Q.defer();
-	HTTP.get({
-		host: "localhost",
-		port: serverInfo.port,
-		path: '/alive'
-	}, result.resolve).on('error', result.reject);
-	setTimeout(function()
-	{
-		// If no success or error response within 1 second we assume server is not running
-		if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
-			result.reject("Error calling `http://localhost:" + serverInfo.port + "/alive`");
-		}
-	}, 1000);
-	return result.promise;
+    var result = Q.defer();
+    HTTP.get({
+        host: "localhost",
+        port: serverInfo.port,
+        path: '/alive'
+    }, result.resolve).on('error', result.reject);
+    setTimeout(function()
+    {
+        // If no success or error response within 1 second we assume server is not running
+        if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
+            result.reject("Error calling `http://localhost:" + serverInfo.port + "/alive`");
+        }
+    }, 1000);
+    return result.promise;
 }
 
 function startServer()
 {
-	var result = Q.defer();
+    var result = Q.defer();
 
-	ourServer = true;
+    ourServer = true;
 
-	var command = "node " +  PATH.normalize(__dirname + "/../example/server --port " + serverInfo.port + " --php " + serverInfo.php);
+    var command = "node " +  PATH.normalize(__dirname + "/../example/server --port " + serverInfo.port + " --php " + serverInfo.php);
 
-	EXEC(command, function (error, stdout, stderr)
+    EXEC(command, function (error, stdout, stderr)
     {
-		// Ignore (server has stopped after stopServer() was called)
-		// NOTE: The following will only print if there was an error and the server stopped prematurely
-		if (verboseServerLog)
-			console.error("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
+        // Ignore (server has stopped after stopServer() was called)
+        // NOTE: The following will only print if there was an error and the server stopped prematurely
+        if (verboseServerLog)
+            console.error("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
     });
-	
-	// Give server 500ms to start up
-	setTimeout(function()
-	{
-		Q.when(testConnection(), result.resolve, result.reject);
-	}, 500);
+    
+    // Give server 500ms to start up
+    setTimeout(function()
+    {
+        Q.when(testConnection(), result.resolve, result.reject);
+    }, 500);
 
-	return result.promise;
+    return result.promise;
 }
 
 function stopServer(verbose)
 {
-	if (!ourServer) return false;
-	verboseServerLog = verbose || false;
+    if (!ourServer) return false;
+    verboseServerLog = verbose || false;
 
-	var result = Q.defer();
+    var result = Q.defer();
 
-	HTTP.get({
-		host: "localhost",
-		port: serverInfo.port,
-		path: '/stop'
-	}, result.resolve).on('error', function()
-	{
-		result.reject("Error calling `http://localhost:" + serverInfo.port + "/stop`");
-	});
+    HTTP.get({
+        host: "localhost",
+        port: serverInfo.port,
+        path: '/stop'
+    }, result.resolve).on('error', function()
+    {
+        result.reject("Error calling `http://localhost:" + serverInfo.port + "/stop`");
+    });
 
-	// Give server 500ms to shut down
-	setTimeout(function()
-	{
-		Q.when(testConnection(), function() {
-			result.reject("Server at `localhost:" + serverInfo.port + "` did not shut down!")
-		}, function() {
-			ourServer = false;
-			result.resolve();
-		});
-	}, 500);
+    // Give server 500ms to shut down
+    setTimeout(function()
+    {
+        Q.when(testConnection(), function() {
+            result.reject("Server at `localhost:" + serverInfo.port + "` did not shut down!")
+        }, function() {
+            ourServer = false;
+            result.resolve();
+        });
+    }, 500);
 
-	return result.promise;
+    return result.promise;
 }
 
 function runBrowserTest(test)
 {
-	var result = Q.defer();
+    var result = Q.defer();
 
-	// Make a connection to the debug proxy server to run a test in the browser
-	// Expect {success:true} or {error:"message"} as response
-	HTTP.get({
-		host: "localhost",
-		port: serverInfo.port,
-		path: "/run-browser-test?test=" + test
-	}, function(res)
-	{
-		if (res.statusCode !== 200) {
-			result.reject("Error 'status: " + res.statusCode + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
-			return;
-		}
-		var data = [];
-		res.on('data', function(chunk) {
+    // Make a connection to the debug proxy server to run a test in the browser
+    // Expect {success:true} or {error:"message"} as response
+    HTTP.get({
+        host: "localhost",
+        port: serverInfo.port,
+        path: "/run-browser-test?test=" + test
+    }, function(res)
+    {
+        if (res.statusCode !== 200) {
+            result.reject("Error 'status: " + res.statusCode + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
+            return;
+        }
+        var data = [];
+        res.on('data', function(chunk) {
             data.push(chunk);
-		});
-		res.on('end', function() {
-			var response;
-			try {
-				response = JSON.parse(data.join(""));
-				if (!response)
-					throw new Error("Response not a valid JSON structure!");
-			} catch(e) {
-				result.reject("Error '" + e + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
-				return;
-			}
-			if (response.success) {
-				result.resolve();
-			} else {
-				result.reject(response.error);
-			}
-		});
-	}).on('error', function(e)
-	{
-		result.reject("Error '" + e + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
-	});
+        });
+        res.on('end', function() {
+            var response;
+            try {
+                response = JSON.parse(data.join(""));
+                if (!response)
+                    throw new Error("Response not a valid JSON structure!");
+            } catch(e) {
+                result.reject("Error '" + e + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
+                return;
+            }
+            if (response.success) {
+                result.resolve();
+            } else {
+                result.reject(response.error);
+            }
+        });
+    }).on('error', function(e)
+    {
+        result.reject("Error '" + e + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
+    });
 
-	return result.promise;
+    return result.promise;
 }

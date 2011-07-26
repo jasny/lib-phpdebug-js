@@ -36,15 +36,15 @@ define(function(require, exports, module)
 
         client.on("connect", function(data)
         {
-        	client.disconnect();
+            client.disconnect();
         });
 
         client.on("disconnect", function(data)
         {
-    		callback(true);
+            callback(true);
         });
 
         client.connect();
-	}
+    }
 
 });

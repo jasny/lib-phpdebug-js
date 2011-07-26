@@ -7,7 +7,7 @@ require({
         "packages": [
             "lib-phpdebug",
             {
-            	name: "lib-phpdebug-test",
+                name: "lib-phpdebug-test",
                 lib: "browser",
             }
         ]
@@ -25,11 +25,11 @@ require([
     require.ready(function()
     {
 
-    	registerTestRunner();
-    	
-    	initUI(XDEBUG);
-    	
-    	initDefaultClient(XDEBUG);
+        registerTestRunner();
+        
+        initUI(XDEBUG);
+        
+        initDefaultClient(XDEBUG);
 
     });
 });
@@ -42,112 +42,112 @@ require([
  */
 function registerTestRunner()
 {
-	// Connect to the "test" socket.io namespace
-	var phpHostname = false,
-		socketIO = io,
-		testSocket = socketIO.connect("http://localhost/test");
-	testSocket.on("run", function (data) {
-		try {
-			// Load the requested test module and run it reporting result back to server
-			require(["lib-phpdebug-test/" + data.test, "lib-phpdebug/xdebug"], function(testModule, XDEBUG) {
-				try {
-					testModule.run(XDEBUG, {
-						socketIO: socketIO,
-						listenPort: 80,
-						helpers: {
-							debugScript: function(name, sessionName)
-							{
-								var url = "http://" + phpHostname + "/scripts/" + name + ".php?";
-								url += "XDEBUG_SESSION_START=" + sessionName;
-								url += "&t=" + new Date().getTime();
-								$("#phpscripts").attr("src", url);
-							}
-						}
-					}, function(result) {
-						if (result === true) {
-							testSocket.emit("run-result", { testIndex: data.testIndex, success: true });
-						} else {
-							testSocket.emit("run-result", { testIndex: data.testIndex, error: ""+result });
-						}
-					});
-				} catch(e) {
-					testSocket.emit("run-result", { testIndex: data.testIndex, error: e + " " + e.stack });
-				}
-			});
-		} catch(e) {
-			testSocket.emit("run-result", { testIndex: data.testIndex, error: e + " " + e.stack });
-		}
-	});
-	testSocket.on("init", function(data)
-	{
-		phpHostname = data.phpHostname;
-		$("#phpscripts").attr("src", "http://" + phpHostname + "/?XDEBUG_SESSION_STOP");
-	});
-	window.runTests = function() {
-		testSocket.emit("run-tests");
-	}
+    // Connect to the "test" socket.io namespace
+    var phpHostname = false,
+        socketIO = io,
+        testSocket = socketIO.connect("http://localhost/test");
+    testSocket.on("run", function (data) {
+        try {
+            // Load the requested test module and run it reporting result back to server
+            require(["lib-phpdebug-test/" + data.test, "lib-phpdebug/xdebug"], function(testModule, XDEBUG) {
+                try {
+                    testModule.run(XDEBUG, {
+                        socketIO: socketIO,
+                        listenPort: 80,
+                        helpers: {
+                            debugScript: function(name, sessionName)
+                            {
+                                var url = "http://" + phpHostname + "/scripts/" + name + ".php?";
+                                url += "XDEBUG_SESSION_START=" + sessionName;
+                                url += "&t=" + new Date().getTime();
+                                $("#phpscripts").attr("src", url);
+                            }
+                        }
+                    }, function(result) {
+                        if (result === true) {
+                            testSocket.emit("run-result", { testIndex: data.testIndex, success: true });
+                        } else {
+                            testSocket.emit("run-result", { testIndex: data.testIndex, error: ""+result });
+                        }
+                    });
+                } catch(e) {
+                    testSocket.emit("run-result", { testIndex: data.testIndex, error: e + " " + e.stack });
+                }
+            });
+        } catch(e) {
+            testSocket.emit("run-result", { testIndex: data.testIndex, error: e + " " + e.stack });
+        }
+    });
+    testSocket.on("init", function(data)
+    {
+        phpHostname = data.phpHostname;
+        $("#phpscripts").attr("src", "http://" + phpHostname + "/?XDEBUG_SESSION_STOP");
+    });
+    window.runTests = function() {
+        testSocket.emit("run-tests");
+    }
 }
 
 
 function initUI(XDEBUG)
 {
-	var clients = {};
+    var clients = {};
 
-	function appendEvent(node, msg) {
-		$('<div class="event">' + msg + '</div>').appendTo(node);
-	}
+    function appendEvent(node, msg) {
+        $('<div class="event">' + msg + '</div>').appendTo(node);
+    }
 
-	XDEBUG.on("connect", function(client)
-	{
-		var clientNode = $('<div class="client"><h3>Client ID: ' + client.id + '</h3></div>').appendTo($("#clients"));
+    XDEBUG.on("connect", function(client)
+    {
+        var clientNode = $('<div class="client"><h3>Client ID: ' + client.id + '</h3></div>').appendTo($("#clients"));
 
-		appendEvent(clientNode, "Connect");
-		
-		client.on("disconnect", function()
-		{
-			appendEvent(clientNode, "Disconnect");
-		
-			setTimeout(function() {
-				clientNode.remove();
-			}, 3000);
-		});
-		
-		client.on("session", function(session)
-		{
-			var sessionNode = $('<div class="session"><h3>Session ID: ' + session.id + '</h3></div>').appendTo(clientNode);
+        appendEvent(clientNode, "Connect");
+        
+        client.on("disconnect", function()
+        {
+            appendEvent(clientNode, "Disconnect");
+        
+            setTimeout(function() {
+                clientNode.remove();
+            }, 3000);
+        });
+        
+        client.on("session", function(session)
+        {
+            var sessionNode = $('<div class="session"><h3>Session ID: ' + session.id + '</h3></div>').appendTo(clientNode);
 
-			appendEvent(sessionNode, "Start");
+            appendEvent(sessionNode, "Start");
 
-			session.on("end", function()
-			{
-				appendEvent(sessionNode, "End");
-				
-				setTimeout(function() {
-					sessionNode.remove();
-				}, 3000);
-			});
-			
-			session.on("*", function(name, args)
-			{
-				if (name === "event")
-				{
-					if (args.type === "status")
-					{
-						appendEvent(sessionNode, "Status: " + args.status);
-					}
-					else
-					if (args.type === "command")
-					{
-						appendEvent(sessionNode, "Command: " + args.name);
-					}
-					else
-						console.log("EVENT", name, args);
-				}
-				else
-					console.log("EVENT", name, args);
-			});
-		});
-	});
+            session.on("end", function()
+            {
+                appendEvent(sessionNode, "End");
+                
+                setTimeout(function() {
+                    sessionNode.remove();
+                }, 3000);
+            });
+            
+            session.on("*", function(name, args)
+            {
+                if (name === "event")
+                {
+                    if (args.type === "status")
+                    {
+                        appendEvent(sessionNode, "Status: " + args.status);
+                    }
+                    else
+                    if (args.type === "command")
+                    {
+                        appendEvent(sessionNode, "Command: " + args.name);
+                    }
+                    else
+                        console.log("EVENT", name, args);
+                }
+                else
+                    console.log("EVENT", name, args);
+            });
+        });
+    });
 }
 
 /**
@@ -157,13 +157,13 @@ function initUI(XDEBUG)
 function initDefaultClient(XDEBUG)
 {
     var client = new XDEBUG.Client({
-		socketIO: io
-	});
+        socketIO: io
+    });
 
     client.on("connect", function()
     {
-    	
+        
     });
 
-    client.connect();	
+    client.connect();   
 }
