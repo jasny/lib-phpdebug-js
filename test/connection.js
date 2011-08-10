@@ -32,19 +32,10 @@ var HELPER = require("./_helper"),
     ASSERT = require("assert"),
     XDEBUG = require("../lib/xdebug");
 
-// NOTE: `HELPER.endSuite();` **MUST** be called at the end of the **LAST** test case!
-
 var Test =
 {
     name: "async",
     
-    setUpSuite: function(next)
-    {
-        HELPER.startSuite(function() {
-            next();
-        });
-    },
-
     "test serverConnection": function(next)
     {
          var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());

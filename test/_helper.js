@@ -77,8 +77,7 @@ var CLI = require("cli"),
 	EXEC = require("child_process").exec;
 
 
-var suiteCount = 0,
-    serverInfo = {},
+var serverInfo = {},
     ourServer = false,  // if we started the debug proxy server
     verboseServerLog = false;
 
@@ -148,12 +147,6 @@ exports.ready = function(callback)
             });
         });
     });
-}
-
-exports.startSuite = function(callback)
-{
-    suiteCount++;
-    callback();
 }
 
 exports.fatalExit = function fatalExit(message)
