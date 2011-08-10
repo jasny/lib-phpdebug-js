@@ -72,7 +72,8 @@ var CLI = require("cli"),
     ASSERT = require("assert"),
     SOCKET_IO_CLIENT = require("socket.io-client"),
     XML2JS = require("xml2js"),
-    NET = require("net");
+    NET = require("net"),
+	EXEC = require("child_process").exec;
 
 
 var suiteCount = 0,
@@ -95,9 +96,33 @@ exports.getAPI = function()
 
 exports.getSocketIO = function()
 {
-    throw new Error("socket.io-client currently does not run on nodejs. see: https://github.com/LearnBoost/socket.io-client/issues/208");
-    
     return SOCKET_IO_CLIENT;
+}
+
+exports.getSocketIOPort = function()
+{
+    return serverInfo.port;
+}
+
+exports.getXdebugClientOptions = function()
+{
+	return {
+	    API: exports.getAPI(),
+	    socketIO: exports.getSocketIO(),
+	    socketIOPort: exports.getSocketIOPort()
+	};
+}
+
+exports.debugScript = function(name, sessionName)
+{
+	EXEC([
+	    'export XDEBUG_CONFIG="idekey=' + sessionName + '"',
+	    ";",
+	    "php " + PATH.dirname(PATH.dirname(module.id)) + "/php/scripts/" + name + ".php"
+    ].join(" "), function (error, stdout, stderr) {
+		console.log("[debugScript][stdout] " + stdout);
+		console.log("[debugScript][stderr] " + stderr);
+	});
 }
 
 exports.ready = function(callback)

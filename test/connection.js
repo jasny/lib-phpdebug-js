@@ -44,13 +44,10 @@ var Test =
             next();
         });
     },
-/*
+
     "test serverConnection": function(next)
     {
-         var client = new XDEBUG.Client({
-             API: HELPER.getAPI(),
-             socketIO: HELPER.getSocketIO()
-         });
+         var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
 
          client.on("connect", function()
          {
@@ -64,8 +61,7 @@ var Test =
 
          client.connect();
     },
-*/
-    
+
     "test browserConnection": function(next)
     {
         HELPER.runBrowserTest("connection", function() {
@@ -75,7 +71,6 @@ var Test =
             });
         });
     }
-    
 }
 
 module.exports = require("../support/asyncjs/lib/test").testcase(Test);

@@ -45,27 +45,34 @@ var Test =
         });
     },
 
-/*    
+
     "test serverSession": function(next)
     {
-         var client = new XDEBUG.ServerClient({
-             listenPort: HELPER.getXdebugPort()
-         });
-         
-         client.on("connect", function()
-         {
-             client.disconnect();
-         });
+        var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
 
-         client.on("disconnect", function()
-         {
-             next();
-         });
+        client.on("connect", function(data)
+        {
+        	HELPER.debugScript("HelloWorld", "session1-server");
+        });
 
-         client.connect();
+        client.on("session", function(session)
+        {
+            session.on("end", function()
+            {
+                client.disconnect();
+            });
+            
+            session.sendCommand("run");
+        });
+
+        client.on("disconnect", function(data)
+        {
+        	next();
+        });
+
+        client.connect();
     },
-*/    
-    
+
     "test browserSession": function(next)
     {
         HELPER.runBrowserTest("session", function() {

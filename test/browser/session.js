@@ -36,7 +36,7 @@ define(function(require, exports, module)
 
         client.on("connect", function(data)
         {
-            options.helpers.debugScript("HelloWorld", "session1");
+            options.helpers.debugScript("HelloWorld", "session1-browser");
         });
 
         client.on("session", function(session)
