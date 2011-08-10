@@ -124,6 +124,8 @@ function startServer(options)
 
     var io = SOCKET_IO.listen(app);
 
+    io.set("log level", 0);
+
     // Initialize and hook in the debug proxy server so it can
     // communicate via `socket.io`.
 
