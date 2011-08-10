@@ -141,6 +141,16 @@ function initUI(XDEBUG)
                         appendEvent(sessionNode, "Command: " + args.name);
                     }
                     else
+                    if (args.type === "command-response")
+                    {
+                        appendEvent(sessionNode, "Command Response: " + args.name);
+                    }
+                    else
+                    if (args.type === "stdout")
+                    {
+                        appendEvent(sessionNode, "STDOUT: " + args.data);
+                    }
+                    else
                         console.log("EVENT", name, args);
                 }
                 else

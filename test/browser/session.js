@@ -36,7 +36,7 @@ define(function(require, exports, module)
 
         client.on("connect", function(data)
         {
-            options.helpers.debugScript("HelloWorld", "session1-browser");
+            options.helpers.debugScript("HelloWorld", "session-browser");
         });
 
         client.on("session", function(session)
@@ -46,7 +46,15 @@ define(function(require, exports, module)
                 client.disconnect();
             });
             
-            session.sendCommand("run");
+            // Watch stdout
+            // @see http://xdebug.org/docs-dbgp.php#stdout-stderr
+            // NOTE: Watching `stderr` does not work for some reason (always returns `args.success = 0`)
+//            session.sendCommand("stdout", {"c": 1}, null, function(args, data, raw)
+//            {
+//            	ASSERT.equal(args.success, "1");
+
+            	session.sendCommand("run");
+//            });
         });
 
         client.on("disconnect", function(data)
