@@ -65,10 +65,7 @@ var Test =
     "test browserConnection": function(next)
     {
         HELPER.runBrowserTest("connection", function() {
-            HELPER.endSuite(function()
-            {
-                next();
-            });
+            next();
         });
     }
 }

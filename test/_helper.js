@@ -69,6 +69,7 @@ var CLI = require("cli"),
     PATH = require("path"),
     EXEC = require("child_process").exec,
     SYS = require("sys"),
+    UTIL = require('util'),
     ASSERT = require("assert"),
     SOCKET_IO_CLIENT = require("socket.io-client"),
     XML2JS = require("xml2js"),
@@ -155,32 +156,29 @@ exports.startSuite = function(callback)
     callback();
 }
 
-exports.endSuite = function(callback)
-{
-    suiteCount--;
-    if (suiteCount === 0) {
-        Q.when(stopServer(), callback);
-    } else {
-        callback();
-    }
-}
-
 exports.fatalExit = function fatalExit(message)
 {
-    console.error(message);
+	UTIL.debug("Error: " + message + "\n");
     process.exit(1);
 }
 
 exports.runBrowserTest = function(test, callback)
 {
+	// If we started the proxy server we assume no browser client is connected
+	// so we cannot run the browser tests. To run the browser tests start the proxy server
+	// manually, open the example client in the browser and run tests from the browser.
+	// TODO: Ask the proxy server if a client is connected
+	if (ourServer)
+	{
+		// Assume all browser tests passed
+		callback();
+		return;
+	}
     Q.when(runBrowserTest(test), callback, function(e)
     {
         console.error("[runBrowserTest] ERROR: " + e);
-        Q.when(stopServer(true), function()
-        {
-            // NOTE: This will throw and thus stop test suite from continuing
-            ASSERT.fail(false, true, ""+e);
-        });
+        // NOTE: This will throw and thus stop test suite from continuing
+        ASSERT.fail(false, true, ""+e);
     });
 }
 
@@ -210,6 +208,8 @@ function startServer()
     ourServer = true;
 
     var command = "node " +  PATH.normalize(__dirname + "/../example/server --port " + serverInfo.port + " --php " + serverInfo.php);
+    
+    console.log("Starting proxy server: " + command);
 
     EXEC(command, function (error, stdout, stderr)
     {
@@ -220,10 +220,28 @@ function startServer()
     });
     
     // Give server 500ms to start up
-    setTimeout(function()
+    var counter = 0;
+    var intervalID = setInterval(function()
     {
-        Q.when(testConnection(), result.resolve, result.reject);
+    	counter++;
+        Q.when(testConnection(), function ok()
+        {
+        	clearInterval(intervalID);
+        	result.resolve();
+        }, function fail()
+        {
+        	if (counter > 5)
+        	{
+            	clearInterval(intervalID);
+            	result.reject();
+        	}
+        });
     }, 500);
+
+    process.on("exit", function()
+    {
+    	stopServer();
+    });
 
     return result.promise;
 }
@@ -233,6 +251,8 @@ function stopServer(verbose)
     if (!ourServer) return false;
     verboseServerLog = verbose || false;
 
+    console.log("Stopping proxy server");
+    
     var result = Q.defer();
 
     HTTP.get({

@@ -45,7 +45,6 @@ var Test =
         });
     },
 
-
     "test serverSession": function(next)
     {
         var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
@@ -76,10 +75,7 @@ var Test =
     "test browserSession": function(next)
     {
         HELPER.runBrowserTest("session", function() {
-            HELPER.endSuite(function()
-            {
-                next();
-            });
+            next();
         });
     }
 }
