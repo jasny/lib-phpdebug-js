@@ -73,7 +73,8 @@ var proxyServer = null,
 // See: https://github.com/chriso/cli/blob/master/examples/static.js
 CLI.parse({
     port:  [false, 'Listen on this port', 'number', PROXY_PORT],
-    php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST]
+    php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST],
+	test: [false, 'Test mode. Must be pinged to stay alive!']
 });
 
 CLI.main(function(args, options)
@@ -84,6 +85,8 @@ CLI.main(function(args, options)
 
 function startServer(options)
 {
+	var lastPing = false;
+
     var app = CONNECT.createServer(
 
         CONNECT_DISPATCH({
@@ -93,10 +96,9 @@ function startServer(options)
                 res.end("OK");
             },
 
-            // Stop the server
-            "/stop": function(req, res) {
+            "/ping": function(req, res) {
+                lastPing = new Date().getTime();
                 res.end("OK");
-                process.exit(0);
             },
 
             // Run a browser client test. If no browser client connected
@@ -123,6 +125,17 @@ function startServer(options)
             "/.*": CONNECT.static(__dirname + '/client', { maxAge: 0 })
         })
     );
+
+    // If in test mode we stop when we are not pinged any more
+    if (options.test)
+    {
+    	setInterval(function()
+    	{
+    		if (lastPing && (new Date().getTime() - lastPing) > 800) {
+				process.exit(0);
+    		}
+    	}, 800);
+    }
 
     var io = SOCKET_IO.listen(app);
 

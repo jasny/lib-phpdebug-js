@@ -202,7 +202,7 @@ function startServer()
 
     ourServer = true;
 
-    var command = "node " +  PATH.normalize(__dirname + "/../example/server --port " + serverInfo.port + " --php " + serverInfo.php);
+    var command = "node " +  PATH.normalize(__dirname + "/../example/server --test --port " + serverInfo.port + " --php " + serverInfo.php);
     
     console.log("Starting proxy server: " + command);
 
@@ -232,43 +232,22 @@ function startServer()
         	}
         });
     }, 500);
-
-    process.on("exit", function()
-    {
-    	stopServer();
-    });
-
-    return result.promise;
-}
-
-function stopServer(verbose)
-{
-    if (!ourServer) return false;
-    verboseServerLog = verbose || false;
-
-    console.log("Stopping proxy server");
     
-    var result = Q.defer();
-
-    HTTP.get({
-        host: "localhost",
-        port: serverInfo.port,
-        path: '/stop'
-    }, result.resolve).on('error', function()
+    function ping()
     {
-        result.reject("Error calling `http://localhost:" + serverInfo.port + "/stop`");
-    });
-
-    // Give server 500ms to shut down
-    setTimeout(function()
-    {
-        Q.when(testConnection(), function() {
-            result.reject("Server at `localhost:" + serverInfo.port + "` did not shut down!")
-        }, function() {
-            ourServer = false;
-            result.resolve();
+        HTTP.get({
+            host: "localhost",
+            port: serverInfo.port,
+            path: '/ping'
         });
-    }, 500);
+    }
+
+    // Ping server for as long as the test script runs
+    Q.when(result.promise, function()
+    {
+    	ping();
+        setInterval(ping, 300);
+    });
 
     return result.promise;
 }
