@@ -42,6 +42,7 @@ HELPER.ready(function()
 {
     ASYNC.concat(
         require("./connection"),
-        require("./session")
+        require("./session"),
+        require("./stepping")
     ).exec()
 });
