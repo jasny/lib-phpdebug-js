@@ -35,7 +35,7 @@ var HELPER = require("./_helper"),
 var Test =
 {
     name: "async",
-    timeout: 5000,
+    timeout: HELPER.getTestTimeout(),
     
     "test serverSession": function(next)
     {

@@ -35,6 +35,7 @@ var HELPER = require("./_helper"),
 var Test =
 {
     name: "async",
+    timeout: HELPER.getTestTimeout(),
     
     "test serverStepping": function(next)
     {

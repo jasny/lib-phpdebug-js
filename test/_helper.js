@@ -60,7 +60,8 @@
 
 const PROXY_PORT = 9080,
       PHP_VHOST = "lib-phpdebug.localhost",
-      XDEBUG_PORT = 9000;
+      XDEBUG_PORT = 9000,
+      TEST_TIMEOUT = 5000;
 
 //TEMPORARY: http://stackoverflow.com/questions/5919629/express-module-not-found-when-installed-with-npm
 require.paths.push('/usr/local/lib/node_modules');
@@ -82,6 +83,12 @@ var CLI = require("cli"),
 var serverInfo = {},
     ourServer = false,  // if we started the debug proxy server
     verboseServerLog = false;
+
+
+exports.getTestTimeout = function()
+{
+	return TEST_TIMEOUT;
+}
 
 exports.getXdebugPort = function()
 {
