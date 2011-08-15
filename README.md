@@ -56,18 +56,17 @@ Test
 
 The following will run a bunch of tests to cover all supported use-cases:
 
-    node ./test/all --port 9080 --php lib-phpdebug.localhost
+    node ./test/all --port 9080 --php lib-phpdebug.localhost --skip-browser-tests
 
-If the example client is open at `http://localhost:9080/` it will show the progress of
-the tests.
+TIP: If the example client is open at `http://localhost:9080/` it will show the progress of
+the tests if the `--skip-browser-tests` argument is omitted.
 
 Demo
 ----
 
 Open the example client at `http://localhost:9080/` (served from the debug proxy server).
 
-You can now use the client to run various tests. You can also run the test suite (see above)
-and watch the progress on the client.
+You can now use the client to run the test suite using the `Run All Tests` link.
 
 
 Author

@@ -132,7 +132,8 @@ exports.ready = function(callback)
     // See: https://github.com/chriso/cli/blob/master/examples/static.js
     CLI.parse({
         port:  [false, 'Listen on this port', 'number', PROXY_PORT],
-        php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST]
+        php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST],
+        'skip-browser-tests': [false, 'Skip browser tests?', 'boolean', false]
     });
 
     CLI.main(function(args, options)
@@ -163,8 +164,9 @@ exports.runBrowserTest = function(test, callback)
 	// so we cannot run the browser tests. To run the browser tests start the proxy server
 	// manually, open the example client in the browser and run tests from the browser.
 	// TODO: Ask the proxy server if a client is connected
-	if (ourServer)
+	if (ourServer || serverInfo['skip-browser-tests'])
 	{
+		console.log("[runBrowserTest] Skip: " + test);
 		// Assume all browser tests passed
 		callback();
 		return;
