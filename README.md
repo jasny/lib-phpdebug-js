@@ -46,20 +46,21 @@ point it to `./php/`. This will be used to serve PHP scripts for the example cli
 Configure *Xdebug* in *php.ini*:
 
     xdebug.remote_enable=1
+    xdebug.idekey=secret-key
     xdebug.remote_port=9000         // default
     xdebug.remote_host=localhost    // default
     xdebug.remote_autostart=0       // default
 
 Launch debug proxy server:
 
-    node ./example/server --port 9080 --php lib-phpdebug.localhost
+    node ./example/server --port 9080 --php lib-phpdebug.localhost --idekey secret-key
 
 Test
 ----
 
 The following will run a bunch of tests to cover all supported use-cases:
 
-    node ./test/all --port 9080 --php lib-phpdebug.localhost --skip-browser-tests
+    node ./test/all --port 9080 --php lib-phpdebug.localhost --skip-browser-tests --idekey secret-key
 
 TIP: If the example client is open at `http://localhost:9080/` it will show the progress of
 the tests if the `--skip-browser-tests` argument is omitted.

@@ -125,8 +125,9 @@ exports.getXdebugClientOptions = function()
 exports.debugScript = function(name, sessionName)
 {
 	EXEC([
-	    'export XDEBUG_CONFIG="idekey=' + sessionName + '"',
-	    ";",
+	    // export XDEBUG_CONFIG="idekey=,session=SESSION"
+	    // export XDEBUG_CONFIG="idekey=IDEKEY,session=SESSION"
+	    'export XDEBUG_CONFIG="' + 'idekey=' + ((serverInfo.idekey)?serverInfo.idekey:'') + ',session=' + sessionName + '";',
 	    "php " + PATH.dirname(PATH.dirname(module.id)) + "/php/scripts/" + name + ".php"
     ].join(" "), function (error, stdout, stderr) {
 //		console.log("[debugScript][stdout] " + stdout);
@@ -141,7 +142,8 @@ exports.ready = function(callback)
     CLI.parse({
         port:  [false, 'Listen on this port', 'number', PROXY_PORT],
         php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST],
-        'skip-browser-tests': [false, 'Skip browser tests?', 'boolean', false]
+        'skip-browser-tests': [false, 'Skip browser tests?', 'boolean', false],
+        'idekey': [false, 'Secret IDE key (xdebug.idekey)', 'string', null]
     });
 
     CLI.main(function(args, options)
@@ -212,7 +214,7 @@ function startServer()
 
     ourServer = true;
 
-    var command = "node " +  PATH.normalize(__dirname + "/../example/server --test --port " + serverInfo.port + " --php " + serverInfo.php);
+    var command = "node " +  PATH.normalize(__dirname + "/../example/server --test --idekey " + serverInfo.idekey + " --port " + serverInfo.port + " --php " + serverInfo.php);
     
     console.log("Starting proxy server: " + command);
 

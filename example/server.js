@@ -74,7 +74,8 @@ var proxyServer = null,
 CLI.parse({
     port:  [false, 'Listen on this port', 'number', PROXY_PORT],
     php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST],
-	test: [false, 'Test mode. Must be pinged to stay alive!']
+	test: [false, 'Test mode. Must be pinged to stay alive!'],
+    idekey: [false, 'Secret IDE key (xdebug.idekey)', 'string', null]
 });
 
 CLI.main(function(args, options)
@@ -152,7 +153,15 @@ function startServer(options)
             NET: NET,
             XML2JS: XML2JS
         },
-        xdebugPort: XDEBUG_PORT
+        xdebugPort: XDEBUG_PORT,
+        // Authorized IDE keys (only validated if set on both sides)
+        idekeys: [
+            options.idekey
+        ],
+        // Authorized xdebug engines
+        ips: [
+            "127.0.0.1"
+        ]
     }));
 
     proxyServer.hook({
