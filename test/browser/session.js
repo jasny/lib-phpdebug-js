@@ -30,7 +30,7 @@
 define(function(require, exports, module)
 {
 
-    exports.run = function(XDEBUG, options, callback)
+    exports.run = function(ASSERT, XDEBUG, options, callback)
     {
         var client = new XDEBUG.Client(options);
 
@@ -49,12 +49,12 @@ define(function(require, exports, module)
             // Watch stdout
             // @see http://xdebug.org/docs-dbgp.php#stdout-stderr
             // NOTE: Watching `stderr` does not work for some reason (always returns `args.success = 0`)
-//            session.sendCommand("stdout", {"c": 1}, null, function(args, data, raw)
-//            {
-//            	ASSERT.equal(args.success, "1");
+            session.sendCommand("stdout", {"c": 1}, null, function(args, data, raw)
+            {
+            	ASSERT.equal(args.success, "1");
 
             	session.sendCommand("run");
-//            });
+            });
         });
 
         client.on("disconnect", function(data)

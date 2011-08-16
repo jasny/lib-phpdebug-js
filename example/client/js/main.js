@@ -51,7 +51,19 @@ function registerTestRunner()
             // Load the requested test module and run it reporting result back to server
             require(["lib-phpdebug-test/" + data.test, "lib-phpdebug/xdebug"], function(testModule, XDEBUG) {
                 try {
-                    testModule.run(XDEBUG, {
+                    testModule.run({
+                    	equal: function(actual, expected, message)
+                    	{
+                    		if (actual != expected)
+                    			console.error("Assertion error: " + message, {actual: actual, expected:expected});
+                    	},
+                    	fail: function(actual, expected, message)
+                    	{
+                    		if (actual != expected)
+                    			console.error("Assertion error: " + message, {actual: actual, expected:expected});
+                    	}
+                    },
+                    XDEBUG, {
                         socketIO: socketIO,
                         listenPort: 80,
                         helpers: {

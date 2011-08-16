@@ -106,7 +106,8 @@ function startServer(options)
             // for the duration of this test.
             "/run-browser-test": function(req, res) {
                 try {
-                    Q.when(runBrowserTest(QS.parse(req.url.replace(/^[^\?]*\?/, "")).test), function() {
+                	var qs = QS.parse(req.url.replace(/^[^\?]*\?/, ""));
+                    Q.when(runBrowserTest(qs.test, qs.timeout), function() {
                         res.end(JSON.stringify({
                             success: true
                         }));
@@ -171,8 +172,10 @@ function startServer(options)
         });
         socket.on("run-result", function(data)
         {
-            if (!runningBrowserTests["i:" + data.testIndex])
+            if (browserTestClients.length > 0 && !runningBrowserTests["i:" + data.testIndex]) {
+            	console.log("WARN: No promise found for run-result index: " + data.testIndex, runningBrowserTests);
                 return;
+            }
             if (data.success) {
                 runningBrowserTests["i:" + data.testIndex].resolve();
             } else
@@ -200,7 +203,7 @@ function startServer(options)
     SYS.puts("Launched Xdebug proxy server on port " + options.port + "\n");
 }
 
-function runBrowserTest(test)
+function runBrowserTest(test, timeout)
 {
     var result = Q.defer();
     
@@ -214,9 +217,9 @@ function runBrowserTest(test)
         setTimeout(function() {
             if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
                 delete runningBrowserTests["i:" + browserTestIndex];
-                result.reject("Browser test took too long to finish!");
+                result.reject("Browser test took too long to finish (timeout: " + (timeout || 5000) + ")!");
             }
-        }, 2000);
+        }, timeout || 5000);
     }
     // If no browser test client connected we simulate a fake one
     else
@@ -235,9 +238,9 @@ function runBrowserTest(test)
 
         setTimeout(function() {
             if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
-                result.reject("Browser test took too long to finish!");
+                result.reject("Browser test took too long to finish (timeout: " + (timeout || 5000) + ")!");
             }
-        }, 2000);
+        }, timeout || 5000);
     }
 
     return result.promise;

@@ -85,9 +85,9 @@ var serverInfo = {},
     verboseServerLog = false;
 
 
-exports.getTestTimeout = function()
+exports.getTestTimeout = function(extra)
 {
-	return TEST_TIMEOUT;
+	return TEST_TIMEOUT + (extra || 0);
 }
 
 exports.getXdebugPort = function()
@@ -166,7 +166,7 @@ exports.fatalExit = function fatalExit(message)
     process.exit(1);
 }
 
-exports.runBrowserTest = function(test, callback)
+exports.runBrowserTest = function(test, callback, timeout)
 {
 	// If we started the proxy server we assume no browser client is connected
 	// so we cannot run the browser tests. To run the browser tests start the proxy server
@@ -179,9 +179,9 @@ exports.runBrowserTest = function(test, callback)
 		callback();
 		return;
 	}
-    Q.when(runBrowserTest(test), callback, function(e)
+    Q.when(runBrowserTest(test, timeout), callback, function(e)
     {
-        console.error("[runBrowserTest] ERROR: " + e);
+        console.log("[runBrowserTest] ERROR: " + e);
         // NOTE: This will throw and thus stop test suite from continuing
         ASSERT.fail(false, true, ""+e);
     });
@@ -262,7 +262,7 @@ function startServer()
     return result.promise;
 }
 
-function runBrowserTest(test)
+function runBrowserTest(test, timeout)
 {
     var result = Q.defer();
 
@@ -271,7 +271,7 @@ function runBrowserTest(test)
     HTTP.get({
         host: "localhost",
         port: serverInfo.port,
-        path: "/run-browser-test?test=" + test
+        path: "/run-browser-test?test=" + test + "&timeout=" + timeout
     }, function(res)
     {
         if (res.statusCode !== 200) {

@@ -27,23 +27,16 @@
  * 
  */
 
-var HELPER = require("./_helper"),
-    ASYNC = require("../support/asyncjs/index"),
-    ASSERT = require("assert"),
-    XDEBUG = require("../lib/xdebug");
-
-var Test =
+define(function(require, exports, module)
 {
-    name: "async",
-    timeout: HELPER.getTestTimeout(10000),	// The browser test can take some time
-    
-    "test serverStepping": function(next)
+
+    exports.run = function(ASSERT, XDEBUG, options, callback)
     {
-        var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
+        var client = new XDEBUG.Client(options);
 
         client.on("connect", function(data)
         {
-        	HELPER.debugScript("Simple", "stepping-server");
+            options.helpers.debugScript("Simple", "stepping-browser");
         });
 
         client.on("session", function(session)
@@ -300,24 +293,11 @@ var Test =
 
         client.on("disconnect", function(data)
         {
-        	next();
+        	console.log("test done!");
+        	callback(true);
         });
 
         client.connect();
-    },
-
-    "test browserStepping": function(next)
-    {
-        HELPER.runBrowserTest("stepping", function() {
-            next();
-        }, 10000);
     }
 
-}
-
-module.exports = require("../support/asyncjs/lib/test").testcase(Test);
-
-if (module === require.main)
-    HELPER.ready(function() {
-        module.exports.exec();
-    });
+});

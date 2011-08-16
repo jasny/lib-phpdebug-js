@@ -30,7 +30,7 @@
 define(function(require, exports, module)
 {
 
-    exports.run = function(XDEBUG, options, callback)
+    exports.run = function(ASSERT, XDEBUG, options, callback)
     {
         var client = new XDEBUG.Client(options);
 
