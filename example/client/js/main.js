@@ -109,7 +109,7 @@ function initUI(XDEBUG)
         
             setTimeout(function() {
                 clientNode.remove();
-            }, 3000);
+            }, 5000);
         });
         
         client.on("session", function(session)
@@ -118,13 +118,18 @@ function initUI(XDEBUG)
 
             appendEvent(sessionNode, "Start");
 
+            session.on("ready", function()
+            {
+                appendEvent(sessionNode, "Ready");
+            });
+
             session.on("end", function()
             {
                 appendEvent(sessionNode, "End");
                 
                 setTimeout(function() {
                     sessionNode.remove();
-                }, 3000);
+                }, 5000);
             });
             
             session.on("*", function(name, args)
@@ -154,6 +159,10 @@ function initUI(XDEBUG)
                         console.log("EVENT", name, args);
                 }
                 else
+                if (name === "ready" || name === "end") {
+                	// do nothing here (to prevent message in console)
+                }
+                else
                     console.log("EVENT", name, args);
             });
         });
@@ -172,7 +181,6 @@ function initDefaultClient(XDEBUG)
 
     client.on("connect", function()
     {
-        
     });
 
     client.connect();   

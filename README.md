@@ -45,7 +45,10 @@ point it to `./php/`. This will be used to serve PHP scripts for the example cli
 
 Configure *Xdebug* in *php.ini*:
 
-    // TODO (default settings for remote debugging should work)
+    xdebug.remote_enable=1
+    xdebug.remote_port=9000         // default
+    xdebug.remote_host=localhost    // default
+    xdebug.remote_autostart=0       // default
 
 Launch debug proxy server:
 

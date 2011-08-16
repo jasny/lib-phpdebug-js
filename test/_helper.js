@@ -129,8 +129,9 @@ exports.debugScript = function(name, sessionName)
 	    ";",
 	    "php " + PATH.dirname(PATH.dirname(module.id)) + "/php/scripts/" + name + ".php"
     ].join(" "), function (error, stdout, stderr) {
-		console.log("[debugScript][stdout] " + stdout);
-		console.log("[debugScript][stderr] " + stderr);
+//		console.log("[debugScript][stdout] " + stdout);
+		if (stderr)
+			console.log("[debugScript][stderr] " + stderr);
 	});
 }
 
