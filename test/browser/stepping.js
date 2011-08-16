@@ -287,6 +287,7 @@ define(function(require, exports, module)
 
             function next8()
             {
+            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
             	session.sendCommand("run");
             }
         });

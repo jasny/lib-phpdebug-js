@@ -60,6 +60,7 @@ var Test =
             {
             	ASSERT.equal(args.success, "1");
 
+            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
             	session.sendCommand("run");
             });
         });
