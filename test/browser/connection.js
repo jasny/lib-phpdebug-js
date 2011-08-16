@@ -44,7 +44,9 @@ define(function(require, exports, module)
             callback(true);
         });
 
-        client.connect();
+        client.connect({
+        	id: "client-browser-connection"
+        });
     }
 
 });

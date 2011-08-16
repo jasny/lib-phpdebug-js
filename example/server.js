@@ -72,6 +72,8 @@ var proxyServer = null,
 
 // See: https://github.com/chriso/cli/blob/master/examples/static.js
 CLI.parse({
+    verbose:  ["v", 'Log major events to console', 'boolean', false],
+    debug:  ["d", 'Log debug messages to console', 'boolean', false],
     port:  [false, 'Listen on this port', 'number', PROXY_PORT],
     php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST],
 	test: [false, 'Test mode. Must be pinged to stay alive!'],
@@ -142,13 +144,22 @@ function startServer(options)
     var io = SOCKET_IO.listen(app);
 
     io.set("log level", 0);
+    if (options.verbose)
+        io.set("log level", 2);
+    if (options.debug)
+        io.set("log level", 3);
 
     // Initialize and hook in the debug proxy server so it can
     // communicate via `socket.io`.
 
-    proxyServer = new XDEBUG_PROXY.Server();
+    proxyServer = new XDEBUG_PROXY.Server({
+    	verbose: options.verbose,
+    	debug: options.debug
+    });
 
     proxyServer.listen(new XDEBUG.Client({
+    	verbose: options.verbose,
+    	debug: options.debug,
         API: {
             NET: NET,
             XML2JS: XML2JS
@@ -167,7 +178,19 @@ function startServer(options)
     proxyServer.hook({
         socketIO: io
     });
+    
+    proxyServer.on("session", function(session)
+    {
+    	if (session.name === "session-locked")
+    	{
+    		// Lock down the session to the client so no other client can listen in.
+    		// See the `../test/session.js` *lockedSession* test.
+    		
+    		session.lockToClient("client-server-session-locked");
+    	}
+    });
 
+    
     // Hook in browser test system
     io.of("/test").on("connection", function(socket)
     {

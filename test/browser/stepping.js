@@ -294,11 +294,12 @@ define(function(require, exports, module)
 
         client.on("disconnect", function(data)
         {
-        	console.log("test done!");
         	callback(true);
         });
 
-        client.connect();
+        client.connect({
+        	id: "client-browser-stepping"
+        });
     }
 
 });

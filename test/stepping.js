@@ -303,7 +303,9 @@ var Test =
         	next();
         });
 
-        client.connect();
+        client.connect({
+        	id: "client-server-stepping"
+        });
     },
 
     "test browserStepping": function(next)

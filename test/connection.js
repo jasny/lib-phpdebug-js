@@ -51,7 +51,9 @@ var Test =
              next();
          });
 
-         client.connect();
+         client.connect({
+         	id: "client-server-connection"
+         });
     },
 
     "test browserConnection": function(next)

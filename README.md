@@ -55,6 +55,8 @@ Launch debug proxy server:
 
     node ./example/server --port 9080 --php lib-phpdebug.localhost --idekey secret-key
 
+Use `-v` to log major events to console and `-d` to log debug messages to console.
+
 Test
 ----
 

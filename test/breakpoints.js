@@ -165,7 +165,9 @@ var Test =
         	next();
         });
 
-        client.connect();
+        client.connect({
+        	id: "client-server-breakpoints"
+        });
     },
 
     "test browserBreakpoints": function(next)

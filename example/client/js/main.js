@@ -195,5 +195,7 @@ function initDefaultClient(XDEBUG)
     {
     });
 
-    client.connect();   
+    client.connect({
+    	id: "client-browser"
+    });   
 }

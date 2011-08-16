@@ -70,7 +70,9 @@ var Test =
         	next();
         });
 
-        client.connect();
+        client.connect({
+        	id: "client-server-session"
+        });
     },
 
     "test browserSession": function(next)
@@ -78,7 +80,48 @@ var Test =
         HELPER.runBrowserTest("session", function() {
             next();
         });
-    }
+    },
+
+    // A session that is locked to the client so no other connected client can monitor
+    // the session. This works by having the proxy server lock the session based on
+    // the session name (second argument to `HELPER.debugScript()` below).
+    "test lockedSession": function(next)
+    {
+        var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
+
+        client.on("connect", function(data)
+        {
+        	HELPER.debugScript("HelloWorld", "session-locked");
+        });
+
+        client.on("session", function(session)
+        {
+            session.on("end", function()
+            {
+                client.disconnect();
+            });
+            
+            // Watch stdout
+            // @see http://xdebug.org/docs-dbgp.php#stdout-stderr
+            // NOTE: Watching `stderr` does not work for some reason (always returns `args.success = 0`)
+            session.sendCommand("stdout", {"c": 1}, null, function(args, data, raw)
+            {
+            	ASSERT.equal(args.success, "1");
+
+            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
+            	session.sendCommand("run");
+            });
+        });
+
+        client.on("disconnect", function(data)
+        {
+        	next();
+        });
+
+        client.connect({
+        	id: "client-server-session-locked"
+        });
+    }    
 }
 
 module.exports = require("../support/asyncjs/lib/test").testcase(Test);
