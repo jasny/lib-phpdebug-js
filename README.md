@@ -33,7 +33,6 @@ Install
     npm install connect socket.io socket.io-client cli q xml2js
     git clone git://github.com/ajaxorg/lib-phpdebug.git
     cd lib-phpdebug
-    git checkout dev
     git submodule init
     git submodule update
 

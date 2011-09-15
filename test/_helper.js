@@ -35,20 +35,6 @@
  *   If the debug proxy server is not running it is started at the beginning of the first test
  *   in the first test suite and shut down after the last test in the last test suite.
  *
- * Usage:
- * 
- *   var HELPER = require("./_helper");
- *   HELPER.ready(function() {
- *      // TODO: for each test suite
- *      HELPER.startSuite(function()
- *      {
- *          // TODO: run test suite
- *          HELPER.endSuite(function() {
- *              // TODO: end test suite
- *          });
- *      });
- *   });
- *
  * External Dependencies:
  * 
  *   * `CLI` <- `npm install cli` -> [https://github.com/chriso/cli](https://github.com/chriso/cli)
