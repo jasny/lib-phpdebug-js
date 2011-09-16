@@ -26,27 +26,20 @@
  * Author: Christoph Dorn <christoph@christophdorn.com> (http://www.christophdorn.com/)
  *   
  */
-
-define(function(require, exports, module)
-{
-
-    exports.run = function(ASSERT, XDEBUG, options, callback)
-    {
+define(function(require, exports, module) {
+    exports.run = function(ASSERT, XDEBUG, options, callback) {
         var client = new XDEBUG.Client(options);
-
-        client.on("connect", function(data)
-        {
+        
+        client.on("connect", function(data) {
             client.disconnect();
         });
-
-        client.on("disconnect", function(data)
-        {
+        
+        client.on("disconnect", function(data) {
             callback(true);
         });
-
+        
         client.connect({
-        	id: "client-browser-connection"
+            id: "client-browser-connection"
         });
-    }
-
+    };
 });

@@ -34,16 +34,11 @@
  *   * `asyncjs` <- `../support/asyncjs/index` -> [https://github.com/ajaxorg/async.js](https://github.com/ajaxorg/async.js)
  *   
  */
-
 var HELPER = require("./_helper"),
     ASYNC = require("../support/asyncjs/index");
 
-HELPER.ready(function()
-{
+HELPER.ready(function() {
     ASYNC.concat(
-        require("./connection"),
-        require("./session"),
-        require("./stepping"),
-        require("./breakpoints")
-    ).exec()
+        require("./connection"), require("./session"), require("./stepping"), require("./breakpoints")
+    ).exec();
 });

@@ -26,47 +26,38 @@
  * Author: Christoph Dorn <christoph@christophdorn.com> (http://www.christophdorn.com/)
  *
  */
-
 var HELPER = require("./_helper"),
     ASYNC = require("../support/asyncjs/index"),
     ASSERT = require("assert"),
     XDEBUG = require("../lib/xdebug");
 
-var Test =
-{
+var Test = {
     name: "async",
     timeout: HELPER.getTestTimeout(),
     
-    "test serverConnection": function(next)
-    {
-         var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
-
-         client.on("connect", function()
-         {
-             client.disconnect();
-         });
-
-         client.on("disconnect", function()
-         {
-             next();
-         });
-
-         client.connect({
-         	id: "client-server-connection"
-         });
+    "test serverConnection": function(next) {
+        var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
+        client.on("connect", function() {
+            client.disconnect();
+        });
+        client.on("disconnect", function() {
+            next();
+        });
+        client.connect({
+            id: "client-server-connection"
+        });
     },
-
-    "test browserConnection": function(next)
-    {
+    
+    "test browserConnection": function(next) {
         HELPER.runBrowserTest("connection", function() {
             next();
         });
     }
-}
+};
 
 module.exports = require("../support/asyncjs/lib/test").testcase(Test);
-
-if (module === require.main)
+if (module === require.main) {
     HELPER.ready(function() {
         module.exports.exec();
     });
+}
