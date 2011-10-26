@@ -62,13 +62,12 @@ var CLI = require("cli"),
     ASSERT = require("assert"),
     SOCKET_IO_CLIENT = require("socket.io-client"),
     XML2JS = require("xml2js"),
-    NET = require("net"),
-	EXEC = require("child_process").exec;
+    NET = require("net");
 
 
 var serverInfo = {},
-    ourServer = false,  // if we started the debug proxy server
-    verboseServerLog = false;
+	serverChildInstance = null,
+    ourServer = false;  // if we started the debug proxy server
 
 
 exports.getTestTimeout = function(extra)
@@ -116,7 +115,8 @@ exports.debugScript = function(name, sessionName)
 	    'export XDEBUG_CONFIG="' + 'idekey=' + ((serverInfo.idekey)?serverInfo.idekey:'') + ',session=' + sessionName + '";',
 	    "php " + PATH.dirname(PATH.dirname(module.id)) + "/php/scripts/" + name + ".php"
     ].join(" "), function (error, stdout, stderr) {
-//		console.log("[debugScript][stdout] " + stdout);
+		if (serverInfo.verbose)
+		    console.log("[debugScript][stdout] " + stdout);
 		if (stderr)
 			console.log("[debugScript][stderr] " + stderr);
 	});
@@ -126,6 +126,7 @@ exports.ready = function(callback)
 {
     // See: https://github.com/chriso/cli/blob/master/examples/static.js
     CLI.parse({
+        verbose:  ["v", 'Log major events to console', 'boolean', false],
         port:  [false, 'Listen on this port', 'number', PROXY_PORT],
         php: [false, 'Hostname for `../php/`', 'string', PHP_VHOST],
         'skip-browser-tests': [false, 'Skip browser tests?', 'boolean', false],
@@ -146,6 +147,11 @@ exports.ready = function(callback)
             });
         });
     });
+}
+
+exports.done = function(callback)
+{
+	stopServer(callback);
 }
 
 exports.fatalExit = function fatalExit(message)
@@ -194,6 +200,17 @@ function testConnection()
     return result.promise;
 }
 
+function stopServer(callback)
+{
+	if (serverChildInstance===null)
+		return;
+    serverChildInstance.on("exit", function()
+    {
+    	callback();
+    });
+	serverChildInstance.kill();
+}
+
 function startServer()
 {
     var result = Q.defer();
@@ -204,14 +221,12 @@ function startServer()
     
     console.log("Starting proxy server: " + command);
 
-    EXEC(command, function (error, stdout, stderr)
+    serverChildInstance = EXEC(command, function (error, stdout, stderr)
     {
-        // Ignore (server has stopped after stopServer() was called)
-        // NOTE: The following will only print if there was an error and the server stopped prematurely
-        if (verboseServerLog)
+        if (serverInfo.verbose)
             console.error("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
     });
-    
+
     // Give server 500ms to start up
     var counter = 0;
     var intervalID = setInterval(function()
@@ -241,10 +256,18 @@ function startServer()
     }
 
     // Ping server for as long as the test script runs
+    var pingIntervalID = null;
     Q.when(result.promise, function()
     {
     	ping();
-        setInterval(ping, 300);
+    	pingIntervalID = setInterval(ping, 300);
+    });
+
+    serverChildInstance.on("exit", function()
+    {
+		if (pingIntervalID!==null)
+			clearInterval(pingIntervalID);
+    	serverChildInstance = null;
     });
 
     return result.promise;

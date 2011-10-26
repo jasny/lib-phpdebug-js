@@ -183,5 +183,11 @@ module.exports = require("../support/asyncjs/lib/test").testcase(Test);
 
 if (module === require.main)
     HELPER.ready(function() {
-        module.exports.exec();
+        module.exports.run().report().summary(function(err, passed)
+        {
+        	HELPER.done(function()
+	    	{
+	    		process.exit(!err && passed ? 0 : 1);
+	    	});
+	    });
     });
