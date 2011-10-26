@@ -26,280 +26,237 @@
  * Author: Christoph Dorn <christoph@christophdorn.com> (http://www.christophdorn.com/)
  * 
  */
-
-define(function(require, exports, module)
-{
-
-    exports.run = function(ASSERT, XDEBUG, options, callback)
-    {
+define(function(require, exports, module) {
+    exports.run = function(ASSERT, XDEBUG, options, callback) {
         var client = new XDEBUG.Client(options);
-
-        client.on("connect", function(data)
-        {
+        client.on("connect", function(data) {
             options.helpers.debugScript("Simple", "stepping-browser");
         });
-
-        client.on("session", function(session)
-        {
-            session.on("end", function()
-            {
+        client.on("session", function(session) {
+            session.on("end", function() {
                 client.disconnect();
             });
-
             // Watch stdout
             // @see http://xdebug.org/docs-dbgp.php#stdout-stderr
             // NOTE: Watching `stderr` does not work for some reason (always returns `args.success = 0`)
-            session.sendCommand("stdout", {"c": 1}, null, function(args, data, raw)
-            {
-            	ASSERT.equal(args.success, "1");
-
-            	// @see http://www.xdebug.org/docs-dbgp.php#status
-                session.sendCommand("status", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(args.status, "starting");
-					ASSERT.equal(args.reason, "ok");
-
-                	next1();
+            session.sendCommand("stdout", {
+                "c": 1
+            }, null, function(args, data, raw) {
+                ASSERT.equal(args.success, "1");
+                // @see http://www.xdebug.org/docs-dbgp.php#status
+                session.sendCommand("status", null, null, function(args, data, raw) {
+                    ASSERT.equal(args.status, "starting");
+                    ASSERT.equal(args.reason, "ok");
+                    next1();
                 });
             });
-            
             // Line: 0-3
-            function next1()
-            {
-            	// NOTE: If the first step command is `step_over` a `run` is issued by xdebug automatically!
-            	//	     We issue a `step_into` instead so we can start stepping through code without breakpoints.
-            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
-                session.sendCommand("step_into", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(args.status, "break");
-					ASSERT.equal(args.reason, "ok");
-					if (!/\/scripts\/Simple\.php$/.test(data.filename)) ASSERT.fail(null, null, "filename");
-					ASSERT.equal(data.lineno, "2");
-					
-	            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
-                    session.sendCommand("step_over", null, null, function(args, data, raw)
-                    {
-                    	ASSERT.equal(args.status, "break");
-    					ASSERT.equal(args.reason, "ok");
-    					if (!/\/scripts\/Simple\.php$/.test(data.filename)) ASSERT.fail(null, null, "filename");
-    					ASSERT.equal(data.lineno, "3");
 
-    					next2();
+            function next1() {
+                // NOTE: If the first step command is `step_over` a `run` is issued by xdebug automatically!
+                //       We issue a `step_into` instead so we can start stepping through code without breakpoints.
+                // @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
+                session.sendCommand("step_into", null, null, function(args, data, raw) {
+                    ASSERT.equal(args.status, "break");
+                    ASSERT.equal(args.reason, "ok");
+                    if (!/\/scripts\/Simple\.php$/.test(data.filename)) ASSERT.fail(null, null, "filename");
+                    ASSERT.equal(data.lineno, "2");
+                    // @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
+                    session.sendCommand("step_over", null, null, function(args, data, raw) {
+                        ASSERT.equal(args.status, "break");
+                        ASSERT.equal(args.reason, "ok");
+                        if (!/\/scripts\/Simple\.php$/.test(data.filename)) ASSERT.fail(null, null, "filename");
+                        ASSERT.equal(data.lineno, "3");
+                        next2();
                     });
                 });
-            	
             }
             // Line: 3
-            function next2()
-            {
-            	// @see http://www.xdebug.org/docs-dbgp.php#stack-depth
-                session.sendCommand("stack_depth", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(args.depth, "1");
 
-					// @see http://www.xdebug.org/docs-dbgp.php#stack-get
-					session.sendCommand("stack_get", {"d": 0}, null, function(args, data, raw)
-			        {
-						ASSERT.equal(data["@"].where, "{main}");
-						ASSERT.equal(data["@"].level, "0");
-						ASSERT.equal(data["@"].type, "file");
-						if (!/\/scripts\/Simple\.php$/.test(data["@"].filename)) ASSERT.fail(null, null, "filename");
-						ASSERT.equal(data["@"].lineno, "3");
-
-						next3();
-	                });
+            function next2() {
+                // @see http://www.xdebug.org/docs-dbgp.php#stack-depth
+                session.sendCommand("stack_depth", null, null, function(args, data, raw) {
+                    ASSERT.equal(args.depth, "1");
+                    // @see http://www.xdebug.org/docs-dbgp.php#stack-get
+                    session.sendCommand("stack_get", {
+                        "d": 0
+                    }, null, function(args, data, raw) {
+                        ASSERT.equal(data["@"].where, "{main}");
+                        ASSERT.equal(data["@"].level, "0");
+                        ASSERT.equal(data["@"].type, "file");
+                        if (!/\/scripts\/Simple\.php$/.test(data["@"].filename)) ASSERT.fail(null, null, "filename");
+                        ASSERT.equal(data["@"].lineno, "3");
+                        next3();
+                    });
                 });
             }
             // Line: 3
-            function next3()
-            {
-            	// @see http://www.xdebug.org/docs-dbgp.php#context-names
-                session.sendCommand("context_names", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(data.length, 2);
-					ASSERT.equal(data[0]["@"].name, "Locals");
-					ASSERT.equal(data[0]["@"].id, "0");
-					
-					ASSERT.equal(data[1]["@"].name, "Superglobals");
-					ASSERT.equal(data[1]["@"].id, "1");
 
-					// @see http://www.xdebug.org/docs-dbgp.php#context-get
-	                session.sendCommand("context_get", {"d": 0, "c": "0"}, null, function(args, data, raw)
-                    {
-						ASSERT.equal(args.context, "0");
-	        			
-						ASSERT.equal(data["@"].name, "var1");
-						ASSERT.equal(data["@"].fullname, "$var1");
-						ASSERT.equal(data["@"].type, "uninitialized");
-
-						// @see http://www.xdebug.org/docs-dbgp.php#context-get
-						session.sendCommand("context_get", {"d": 0, "c": "1"}, null, function(args, data, raw)
-                        {
-    						ASSERT.equal(args.context, "1");
-
-    						ASSERT.equal(data[0]["@"].name, "_COOKIE");
-    						ASSERT.equal(data[1]["@"].name, "_ENV");
-    						ASSERT.equal(data[2]["@"].name, "_FILES");
-    						ASSERT.equal(data[3]["@"].name, "_GET");
-    						ASSERT.equal(data[4]["@"].name, "_POST");
-    						ASSERT.equal(data[5]["@"].name, "_REQUEST");
-    						ASSERT.equal(data[6]["@"].name, "_SERVER");
-    						ASSERT.equal(data[7]["@"].name, "GLOBALS");
-    						
-    		            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
-    	                    session.sendCommand("step_over", null, null, function(args, data, raw)
-    	                    {
-    	                    	next4();
-    	                    });
+            function next3() {
+                // @see http://www.xdebug.org/docs-dbgp.php#context-names
+                session.sendCommand("context_names", null, null, function(args, data, raw) {
+                    ASSERT.equal(data.length, 2);
+                    ASSERT.equal(data[0]["@"].name, "Locals");
+                    ASSERT.equal(data[0]["@"].id, "0");
+                    ASSERT.equal(data[1]["@"].name, "Superglobals");
+                    ASSERT.equal(data[1]["@"].id, "1");
+                    // @see http://www.xdebug.org/docs-dbgp.php#context-get
+                    session.sendCommand("context_get", {
+                        "d": 0,
+                        "c": "0"
+                    }, null, function(args, data, raw) {
+                        ASSERT.equal(args.context, "0");
+                        ASSERT.equal(data["@"].name, "var1");
+                        ASSERT.equal(data["@"].fullname, "$var1");
+                        ASSERT.equal(data["@"].type, "uninitialized");
+                        // @see http://www.xdebug.org/docs-dbgp.php#context-get
+                        session.sendCommand("context_get", {
+                            "d": 0,
+                            "c": "1"
+                        }, null, function(args, data, raw) {
+                            ASSERT.equal(args.context, "1");
+                            ASSERT.equal(data[0]["@"].name, "_COOKIE");
+                            ASSERT.equal(data[1]["@"].name, "_ENV");
+                            ASSERT.equal(data[2]["@"].name, "_FILES");
+                            ASSERT.equal(data[3]["@"].name, "_GET");
+                            ASSERT.equal(data[4]["@"].name, "_POST");
+                            ASSERT.equal(data[5]["@"].name, "_REQUEST");
+                            ASSERT.equal(data[6]["@"].name, "_SERVER");
+                            ASSERT.equal(data[7]["@"].name, "GLOBALS");
+                            // @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
+                            session.sendCommand("step_over", null, null, function(args, data, raw) {
+                                next4();
+                            });
                         });
                     });
                 });
             }
             // Line: 4
-            function next4()
-            {
-            	// @see http://www.xdebug.org/docs-dbgp.php#context-names
-                session.sendCommand("context_names", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(data[0]["@"].id, "0");
-                	
-					// @see http://www.xdebug.org/docs-dbgp.php#context-get
-	                session.sendCommand("context_get", {"d": 0, "c": "0"}, null, function(args, data, raw)
-                    {
-						ASSERT.equal(args.context, "0");
-						
-						ASSERT.equal(data["@"].name, "var1");
-						ASSERT.equal(data["@"].fullname, "$var1");
-						ASSERT.equal(data["@"].type, "array");
-						ASSERT.equal(data["@"].children, "1");
-						ASSERT.equal(data["@"].numchildren, "2");
 
-						ASSERT.equal(data.property[0]["@"].name, "key");
-						ASSERT.equal(data.property[0]["@"].fullname, "$var1['key']");
-						ASSERT.equal(data.property[0]["@"].type, "string");
-						ASSERT.equal(XDEBUG.base64_decode(data.property[0]["#"]), "value1");
-
-						ASSERT.equal(data.property[1]["@"].name, "items");
-						ASSERT.equal(data.property[1]["@"].fullname, "$var1['items']");
-						ASSERT.equal(data.property[1]["@"].type, "array");
-						ASSERT.equal(data.property[1]["@"].children, "1");
-						ASSERT.equal(data.property[1]["@"].numchildren, "2");
-
-						// @see http://www.xdebug.org/docs-dbgp.php#property-get-property-set-property-value
-		                session.sendCommand("property_get", {"d": 0, "c": "0", "n": "$var1['items']"}, null, function(args, data, raw)
-                        {
-							ASSERT.equal(data["@"].name, "$var1['items']");
-							ASSERT.equal(data["@"].fullname, "$var1['items']");
-							
-							ASSERT.equal(data.property[0]["@"].name, "0");
-							ASSERT.equal(data.property[0]["@"].fullname, "$var1['items'][0]");
-							ASSERT.equal(XDEBUG.base64_decode(data.property[0]["#"]), "item1");
-							
-							ASSERT.equal(data.property[1]["@"].name, "1");
-							ASSERT.equal(data.property[1]["@"].fullname, "$var1['items'][1]");
-							ASSERT.equal(XDEBUG.base64_decode(data.property[1]["#"]), "item2");
-
-							next5();
+            function next4() {
+                // @see http://www.xdebug.org/docs-dbgp.php#context-names
+                session.sendCommand("context_names", null, null, function(args, data, raw) {
+                    ASSERT.equal(data[0]["@"].id, "0");
+                    // @see http://www.xdebug.org/docs-dbgp.php#context-get
+                    session.sendCommand("context_get", {
+                        "d": 0,
+                        "c": "0"
+                    }, null, function(args, data, raw) {
+                        ASSERT.equal(args.context, "0");
+                        ASSERT.equal(data["@"].name, "var1");
+                        ASSERT.equal(data["@"].fullname, "$var1");
+                        ASSERT.equal(data["@"].type, "array");
+                        ASSERT.equal(data["@"].children, "1");
+                        ASSERT.equal(data["@"].numchildren, "2");
+                        ASSERT.equal(data.property[0]["@"].name, "key");
+                        ASSERT.equal(data.property[0]["@"].fullname, "$var1['key']");
+                        ASSERT.equal(data.property[0]["@"].type, "string");
+                        ASSERT.equal(XDEBUG.base64_decode(data.property[0]["#"]), "value1");
+                        ASSERT.equal(data.property[1]["@"].name, "items");
+                        ASSERT.equal(data.property[1]["@"].fullname, "$var1['items']");
+                        ASSERT.equal(data.property[1]["@"].type, "array");
+                        ASSERT.equal(data.property[1]["@"].children, "1");
+                        ASSERT.equal(data.property[1]["@"].numchildren, "2");
+                        // @see http://www.xdebug.org/docs-dbgp.php#property-get-property-set-property-value
+                        session.sendCommand("property_get", {
+                            "d": 0,
+                            "c": "0",
+                            "n": "$var1['items']"
+                        }, null, function(args, data, raw) {
+                            ASSERT.equal(data["@"].name, "$var1['items']");
+                            ASSERT.equal(data["@"].fullname, "$var1['items']");
+                            ASSERT.equal(data.property[0]["@"].name, "0");
+                            ASSERT.equal(data.property[0]["@"].fullname, "$var1['items'][0]");
+                            ASSERT.equal(XDEBUG.base64_decode(data.property[0]["#"]), "item1");
+                            ASSERT.equal(data.property[1]["@"].name, "1");
+                            ASSERT.equal(data.property[1]["@"].fullname, "$var1['items'][1]");
+                            ASSERT.equal(XDEBUG.base64_decode(data.property[1]["#"]), "item2");
+                            next5();
                         });
                     });
                 });
             }
             // Line: 4-18
-            function next5()
-            {
-            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
-                session.sendCommand("step_over", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(data.lineno, "5");
-	                session.sendCommand("step_into", null, null, function(args, data, raw)
-                    {
-						ASSERT.equal(data.lineno, "9");
-	                    session.sendCommand("step_over", null, null, function(args, data, raw)
-                        {
-							ASSERT.equal(data.lineno, "10");
-	                        session.sendCommand("step_over", null, null, function(args, data, raw)
-	                        {
-								ASSERT.equal(data.lineno, "11");
-	        	                session.sendCommand("step_into", null, null, function(args, data, raw)
-    	                        {
-									ASSERT.equal(data.lineno, "12");
-		        	                session.sendCommand("step_into", null, null, function(args, data, raw)
-	    	                        {
-										ASSERT.equal(data.lineno, "16");
-		        	                    session.sendCommand("step_over", null, null, function(args, data, raw)
-	    	                            {
-											ASSERT.equal(data.lineno, "17");
-		        		                    session.sendCommand("step_over", null, null, function(args, data, raw)
-	    		                            {
-												ASSERT.equal(data.lineno, "18");
-	                	
-												next6();
-	    	    	                        });
-    	    	                        });
-        	                        });
-    	                        });
-	                        });
+
+            function next5() {
+                // @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
+                session.sendCommand("step_over", null, null, function(args, data, raw) {
+                    ASSERT.equal(data.lineno, "5");
+                    session.sendCommand("step_into", null, null, function(args, data, raw) {
+                        ASSERT.equal(data.lineno, "9");
+                        session.sendCommand("step_over", null, null, function(args, data, raw) {
+                            ASSERT.equal(data.lineno, "10");
+                            session.sendCommand("step_over", null, null, function(args, data, raw) {
+                                ASSERT.equal(data.lineno, "11");
+                                session.sendCommand("step_into", null, null, function(args, data, raw) {
+                                    ASSERT.equal(data.lineno, "12");
+                                    session.sendCommand("step_into", null, null, function(args, data, raw) {
+                                        ASSERT.equal(data.lineno, "16");
+                                        session.sendCommand("step_over", null, null, function(args, data, raw) {
+                                            ASSERT.equal(data.lineno, "17");
+                                            session.sendCommand("step_over", null, null, function(args, data, raw) {
+                                                ASSERT.equal(data.lineno, "18");
+                                                next6();
+                                            });
+                                        });
+                                    });
+                                });
+                            });
                         });
                     });
                 });
-            	
             }
             // Line: 18
-            function next6()
-            {
-            	// @see http://www.xdebug.org/docs-dbgp.php#context-names
-                session.sendCommand("context_names", null, null, function(args, data, raw)
-                {
-					ASSERT.equal(data[0]["@"].id, "0");
-					
-					// @see http://www.xdebug.org/docs-dbgp.php#context-get
-					session.sendCommand("context_get", {"d": 0, "c": "0"}, null, function(args, data, raw)
-					{
-						ASSERT.equal(args.context, "0");
 
-						ASSERT.equal(data[0]["@"].fullname, "$in1");
-						ASSERT.equal(data[0].property[1]["@"].numchildren, "3");
-						ASSERT.equal(XDEBUG.base64_decode(data[0].property[0]["#"]), "value1");
-						
-						ASSERT.equal(data[1]["@"].fullname, "$in2");
-						ASSERT.equal(data[1].property[1]["@"].numchildren, "2");
-						ASSERT.equal(XDEBUG.base64_decode(data[1].property[0]["#"]), "value1");
-
-						next7();
-					});
+            function next6() {
+                // @see http://www.xdebug.org/docs-dbgp.php#context-names
+                session.sendCommand("context_names", null, null, function(args, data, raw) {
+                    ASSERT.equal(data[0]["@"].id, "0");
+                    // @see http://www.xdebug.org/docs-dbgp.php#context-get
+                    session.sendCommand("context_get", {
+                        "d": 0,
+                        "c": "0"
+                    }, null, function(args, data, raw) {
+                        ASSERT.equal(args.context, "0");
+                        ASSERT.equal(data[0]["@"].fullname, "$in1");
+                        ASSERT.equal(data[0].property[1]["@"].numchildren, "3");
+                        ASSERT.equal(XDEBUG.base64_decode(data[0].property[0]["#"]), "value1");
+                        ASSERT.equal(data[1]["@"].fullname, "$in2");
+                        ASSERT.equal(data[1].property[1]["@"].numchildren, "2");
+                        ASSERT.equal(XDEBUG.base64_decode(data[1].property[0]["#"]), "value1");
+                        next7();
+                    });
                 });
             }
             // Line: 18
-            function next7()
-            {
-				// @see http://www.xdebug.org/docs-dbgp.php#stack-get
-				session.sendCommand("stack_get", {"d": 0}, null, function(args, data, raw)
-		        {
-	            	// @see http://www.xdebug.org/docs-dbgp.php#source
-	                session.sendCommand("source", {"f": data["@"].filename, "b": 18, "e": 18}, null, function(args, data, raw)
-	                {
-						if (!/var_dump\(array_diff\(\$in1\['items'\], \$in2\['items'\]\)\);/.test(data)) ASSERT.fail(null, null, "source");
 
-						next8();
-	                });
+            function next7() {
+                // @see http://www.xdebug.org/docs-dbgp.php#stack-get
+                session.sendCommand("stack_get", {
+                    "d": 0
+                }, null, function(args, data, raw) {
+                    // @see http://www.xdebug.org/docs-dbgp.php#source
+                    session.sendCommand("source", {
+                        "f": data["@"].filename,
+                        "b": 18,
+                        "e": 18
+                    }, null, function(args, data, raw) {
+                        if (!/var_dump\(array_diff\(\$in1\['items'\], \$in2\['items'\]\)\);/.test(data)) ASSERT.fail(null, null, "source");
+                        next8();
+                    });
                 });
             }
 
-            function next8()
-            {
-            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
-            	session.sendCommand("run");
+            function next8() {
+                // @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
+                session.sendCommand("run");
             }
         });
-
-        client.on("disconnect", function(data)
-        {
-        	callback(true);
+        client.on("disconnect", function(data) {
+            callback(true);
         });
-
         client.connect({
-        	id: "client-browser-stepping"
+            id: "client-browser-stepping"
         });
-    }
-
+    };
 });

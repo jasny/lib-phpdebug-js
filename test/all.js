@@ -34,12 +34,10 @@
  *   * `asyncjs` <- `../support/asyncjs/index` -> [https://github.com/ajaxorg/async.js](https://github.com/ajaxorg/async.js)
  *   
  */
-
 var HELPER = require("./_helper"),
     ASYNC = require("../support/asyncjs/index");
 
-HELPER.ready(function()
-{
+HELPER.ready(function() {
     ASYNC.concat(
         require("./connection"),
         require("./session"),
@@ -47,9 +45,9 @@ HELPER.ready(function()
         require("./breakpoints")
     ).run().report().summary(function(err, passed)
     {
-    	HELPER.done(function()
-    	{
-    		process.exit(!err && passed ? 0 : 1);
-    	});
+        HELPER.done(function()
+        {
+            process.exit(!err && passed ? 0 : 1);
+        });
     });
 });

@@ -43,15 +43,9 @@
  *   * `XML2JS` <- `npm install xml2js` -> [https://github.com/Leonidas-from-XIV/node-xml2js/](https://github.com/Leonidas-from-XIV/node-xml2js/)
  *
  */
-
-const PROXY_PORT = 9080,
-      PHP_VHOST = "lib-phpdebug.localhost",
-      XDEBUG_PORT = 9000,
-      TEST_TIMEOUT = 5000;
-
+const PROXY_PORT = 9080, PHP_VHOST = "lib-phpdebug.localhost", XDEBUG_PORT = 9000, TEST_TIMEOUT = 5000;
 //TEMPORARY: http://stackoverflow.com/questions/5919629/express-module-not-found-when-installed-with-npm
 require.paths.push('/usr/local/lib/node_modules');
-
 var CLI = require("cli"),
     Q = require("q"),
     HTTP = require("http"),
@@ -66,64 +60,57 @@ var CLI = require("cli"),
 
 
 var serverInfo = {},
-	serverChildInstance = null,
+    serverChildInstance = null,
     ourServer = false;  // if we started the debug proxy server
 
 
-exports.getTestTimeout = function(extra)
-{
-	return TEST_TIMEOUT + (extra || 0);
-}
+exports.getTestTimeout = function(extra) {
+    return TEST_TIMEOUT + (extra || 0);
+};
 
-exports.getXdebugPort = function()
-{
+exports.getXdebugPort = function() {
     return XDEBUG_PORT;
-}
+};
 
-exports.getAPI = function()
-{
+exports.getAPI = function() {
     return {
         NET: NET,
         XML2JS: XML2JS
-    }
-}
+    };
+};
 
-exports.getSocketIO = function()
-{
+exports.getSocketIO = function() {
     return SOCKET_IO_CLIENT;
-}
+};
 
-exports.getSocketIOPort = function()
-{
+exports.getSocketIOPort = function() {
     return serverInfo.port;
-}
+};
 
-exports.getXdebugClientOptions = function()
-{
-	return {
-	    API: exports.getAPI(),
-	    socketIO: exports.getSocketIO(),
-	    socketIOPort: exports.getSocketIOPort()
-	};
-}
+exports.getXdebugClientOptions = function() {
+    return {
+        API: exports.getAPI(),
+        socketIO: exports.getSocketIO(),
+        socketIOPort: exports.getSocketIOPort()
+    };
+};
 
 exports.debugScript = function(name, sessionName)
 {
-	EXEC([
-	    // export XDEBUG_CONFIG="idekey=,session=SESSION"
-	    // export XDEBUG_CONFIG="idekey=IDEKEY,session=SESSION"
-	    'export XDEBUG_CONFIG="' + 'idekey=' + ((serverInfo.idekey)?serverInfo.idekey:'') + ',session=' + sessionName + '";',
-	    "php " + PATH.dirname(PATH.dirname(module.id)) + "/php/scripts/" + name + ".php"
+    EXEC([
+        // export XDEBUG_CONFIG="idekey=,session=SESSION"
+        // export XDEBUG_CONFIG="idekey=IDEKEY,session=SESSION"
+        'export XDEBUG_CONFIG="' + 'idekey=' + ((serverInfo.idekey)?serverInfo.idekey:'') + ',session=' + sessionName + '";',
+        "php " + PATH.dirname(PATH.dirname(module.id)) + "/php/scripts/" + name + ".php"
     ].join(" "), function (error, stdout, stderr) {
-		if (serverInfo.verbose)
-		    console.log("[debugScript][stdout] " + stdout);
-		if (stderr)
-			console.log("[debugScript][stderr] " + stderr);
-	});
+        if (serverInfo.verbose)
+            console.log("[debugScript][stdout] " + stdout);
+        if (stderr)
+            console.log("[debugScript][stderr] " + stderr);
+    });
 }
 
-exports.ready = function(callback)
-{
+exports.ready = function(callback) {
     // See: https://github.com/chriso/cli/blob/master/examples/static.js
     CLI.parse({
         verbose:  ["v", 'Log major events to console', 'boolean', false],
@@ -132,9 +119,7 @@ exports.ready = function(callback)
         'skip-browser-tests': [false, 'Skip browser tests?', 'boolean', false],
         'idekey': [false, 'Secret IDE key (xdebug.idekey)', 'string', null]
     });
-
-    CLI.main(function(args, options)
-    {
+    CLI.main(function(args, options) {
         serverInfo = options;
         // Test connection to debug proxy server. If not running we start it.
         Q.when(testConnection(), function ok() {
@@ -147,51 +132,44 @@ exports.ready = function(callback)
             });
         });
     });
-}
+};
 
 exports.done = function(callback)
 {
-	stopServer(callback);
+    stopServer(callback);
 }
 
-exports.fatalExit = function fatalExit(message)
-{
-	UTIL.debug("Error: " + message + "\n");
+exports.fatalExit = function fatalExit(message) {
+    UTIL.debug("Error: " + message + "\n");
     process.exit(1);
-}
+};
 
-exports.runBrowserTest = function(test, callback, timeout)
-{
-	// If we started the proxy server we assume no browser client is connected
-	// so we cannot run the browser tests. To run the browser tests start the proxy server
-	// manually, open the example client in the browser and run tests from the browser.
-	// TODO: Ask the proxy server if a client is connected
-	if (ourServer || serverInfo['skip-browser-tests'])
-	{
-		console.log("[runBrowserTest] Skip: " + test);
-		// Assume all browser tests passed
-		callback();
-		return;
-	}
-    Q.when(runBrowserTest(test, timeout), callback, function(e)
-    {
+exports.runBrowserTest = function(test, callback, timeout) {
+    // If we started the proxy server we assume no browser client is connected
+    // so we cannot run the browser tests. To run the browser tests start the proxy server
+    // manually, open the example client in the browser and run tests from the browser.
+    // TODO: Ask the proxy server if a client is connected
+    if (ourServer || serverInfo['skip-browser-tests']) {
+        console.log("[runBrowserTest] Skip: " + test);
+        // Assume all browser tests passed
+        callback();
+        return;
+    }
+    Q.when(runBrowserTest(test, timeout), callback, function(e) {
         console.log("[runBrowserTest] ERROR: " + e);
         // NOTE: This will throw and thus stop test suite from continuing
-        ASSERT.fail(false, true, ""+e);
+        ASSERT.fail(false, true, "" + e);
     });
-}
+};
 
-
-function testConnection()
-{
+function testConnection() {
     var result = Q.defer();
     HTTP.get({
         host: "localhost",
         port: serverInfo.port,
         path: '/alive'
     }, result.resolve).on('error', result.reject);
-    setTimeout(function()
-    {
+    setTimeout(function() {
         // If no success or error response within 1 second we assume server is not running
         if (!Q.isResolved(result.promise) && !Q.isRejected(result.promise)) {
             result.reject("Error calling `http://localhost:" + serverInfo.port + "/alive`");
@@ -200,25 +178,23 @@ function testConnection()
     return result.promise;
 }
 
-function stopServer(callback)
-{
-	if (serverChildInstance===null)
-		return;
+function stopServer(callback) {
+    if (serverChildInstance===null)
+    {
+        callback();
+        return;
+    }
     serverChildInstance.on("exit", function()
     {
-    	callback();
+        callback();
     });
-	serverChildInstance.kill();
+    serverChildInstance.kill();
 }
 
-function startServer()
-{
+function startServer() {
     var result = Q.defer();
-
     ourServer = true;
-
-    var command = "node " +  PATH.normalize(__dirname + "/../example/server --test --idekey " + serverInfo.idekey + " --port " + serverInfo.port + " --php " + serverInfo.php);
-    
+    var command = "node " + PATH.normalize(__dirname + "/../example/server --test --idekey " + serverInfo.idekey + " --port " + serverInfo.port + " --php " + serverInfo.php);
     console.log("Starting proxy server: " + command);
 
     serverChildInstance = EXEC(command, function (error, stdout, stderr)
@@ -229,62 +205,52 @@ function startServer()
 
     // Give server 500ms to start up
     var counter = 0;
-    var intervalID = setInterval(function()
-    {
-    	counter++;
-        Q.when(testConnection(), function ok()
-        {
-        	clearInterval(intervalID);
-        	result.resolve();
-        }, function fail()
-        {
-        	if (counter > 5)
-        	{
-            	clearInterval(intervalID);
-            	result.reject();
-        	}
+    var intervalID = setInterval(function() {
+        counter++;
+        Q.when(testConnection(), function ok() {
+            clearInterval(intervalID);
+            result.resolve();
+        }, function fail() {
+            if (counter > 5) {
+                clearInterval(intervalID);
+                result.reject();
+            }
         });
     }, 500);
-    
-    function ping()
-    {
+
+    function ping() {
         HTTP.get({
             host: "localhost",
             port: serverInfo.port,
             path: '/ping'
         });
     }
-
     // Ping server for as long as the test script runs
     var pingIntervalID = null;
     Q.when(result.promise, function()
     {
-    	ping();
-    	pingIntervalID = setInterval(ping, 300);
+        ping();
+        pingIntervalID = setInterval(ping, 300);
     });
 
     serverChildInstance.on("exit", function()
     {
-		if (pingIntervalID!==null)
-			clearInterval(pingIntervalID);
-    	serverChildInstance = null;
+        if (pingIntervalID!==null)
+            clearInterval(pingIntervalID);
+        serverChildInstance = null;
     });
-
     return result.promise;
 }
 
-function runBrowserTest(test, timeout)
-{
+function runBrowserTest(test, timeout) {
     var result = Q.defer();
-
     // Make a connection to the debug proxy server to run a test in the browser
     // Expect {success:true} or {error:"message"} as response
     HTTP.get({
         host: "localhost",
         port: serverInfo.port,
         path: "/run-browser-test?test=" + test + "&timeout=" + timeout
-    }, function(res)
-    {
+    }, function(res) {
         if (res.statusCode !== 200) {
             result.reject("Error 'status: " + res.statusCode + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
             return;
@@ -297,22 +263,21 @@ function runBrowserTest(test, timeout)
             var response;
             try {
                 response = JSON.parse(data.join(""));
-                if (!response)
-                    throw new Error("Response not a valid JSON structure!");
-            } catch(e) {
+                if (!response) throw new Error("Response not a valid JSON structure!");
+            }
+            catch (e) {
                 result.reject("Error '" + e + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
                 return;
             }
             if (response.success) {
                 result.resolve();
-            } else {
+            }
+            else {
                 result.reject(response.error);
             }
         });
-    }).on('error', function(e)
-    {
+    }).on('error', function(e) {
         result.reject("Error '" + e + "' calling `http://localhost:" + serverInfo.port + "/run-browser-test`");
     });
-
     return result.promise;
 }
