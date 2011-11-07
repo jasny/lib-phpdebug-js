@@ -40,7 +40,7 @@ var Test = {
         var client = new XDEBUG.Client(HELPER.getXdebugClientOptions());
         
         client.on("connect", function(data) {
-            HELPER.debugScript("Simple", "stepping-server");
+            HELPER.debugScript("Simple", "breakpoints-server");
         });
         
         client.on("session", function(session) {
