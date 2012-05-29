@@ -135,7 +135,7 @@ var Test =
                     {
 						ASSERT.equal(args.context, "0");
 	        			
-						ASSERT.equal(data["@"].name, "var1");
+						ASSERT.equal(data["@"].name, "$var1");
 						ASSERT.equal(data["@"].fullname, "$var1");
 						ASSERT.equal(data["@"].type, "uninitialized");
 
@@ -144,14 +144,14 @@ var Test =
                         {
     						ASSERT.equal(args.context, "1");
 
-    						ASSERT.equal(data[0]["@"].name, "_COOKIE");
-    						ASSERT.equal(data[1]["@"].name, "_ENV");
-    						ASSERT.equal(data[2]["@"].name, "_FILES");
-    						ASSERT.equal(data[3]["@"].name, "_GET");
-    						ASSERT.equal(data[4]["@"].name, "_POST");
-    						ASSERT.equal(data[5]["@"].name, "_REQUEST");
-    						ASSERT.equal(data[6]["@"].name, "_SERVER");
-    						ASSERT.equal(data[7]["@"].name, "GLOBALS");
+    						ASSERT.equal(data[0]["@"].name, "$_COOKIE");
+    						ASSERT.equal(data[1]["@"].name, "$_ENV");
+    						ASSERT.equal(data[2]["@"].name, "$_FILES");
+    						ASSERT.equal(data[3]["@"].name, "$_GET");
+    						ASSERT.equal(data[4]["@"].name, "$_POST");
+    						ASSERT.equal(data[5]["@"].name, "$_REQUEST");
+    						ASSERT.equal(data[6]["@"].name, "$_SERVER");
+    						ASSERT.equal(data[7]["@"].name, "$GLOBALS");
     						
     		            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
     	                    session.sendCommand("step_over", null, null, function(args, data, raw)
@@ -175,7 +175,7 @@ var Test =
                     {
 						ASSERT.equal(args.context, "0");
 						
-						ASSERT.equal(data["@"].name, "var1");
+						ASSERT.equal(data["@"].name, "$var1");
 						ASSERT.equal(data["@"].fullname, "$var1");
 						ASSERT.equal(data["@"].type, "array");
 						ASSERT.equal(data["@"].children, "1");
