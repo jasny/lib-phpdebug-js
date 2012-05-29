@@ -44,8 +44,11 @@
  *
  */
 const PROXY_PORT = 9080, PHP_VHOST = "lib-phpdebug.localhost", XDEBUG_PORT = 9000, TEST_TIMEOUT = 5000;
+
 //TEMPORARY: http://stackoverflow.com/questions/5919629/express-module-not-found-when-installed-with-npm
-require.paths.push('/usr/local/lib/node_modules');
+//Set NODE_PATH in your environment instead (https://github.com/unconed/TermKit/issues/68)
+//require.paths.push('/usr/local/lib/node_modules');
+
 var CLI = require("cli"),
     Q = require("q"),
     HTTP = require("http"),

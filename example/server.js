@@ -47,13 +47,15 @@ const XDEBUG_PORT = 9000,
       PHP_VHOST = "lib-phpdebug.localhost";
 
 //TEMPORARY: http://stackoverflow.com/questions/5919629/express-module-not-found-when-installed-with-npm
-require.paths.push('/usr/local/lib/node_modules');
+//Set NODE_PATH in your environment instead (https://github.com/unconed/TermKit/issues/68)
+//require.paths.push('/usr/local/lib/node_modules');
 
 var SYS = require("sys"),
     CLI = require("cli"),
     Q = require("q"),
     PATH = require("path"),
     QS = require("querystring"),
+    HTTP = require('http'),
     CONNECT = require("connect"),
     CONNECT_DISPATCH = require("../support/dispatch"),
     SOCKET_IO = require("socket.io"),
@@ -129,6 +131,9 @@ function startServer(options)
             "/.*": CONNECT.static(__dirname + '/client', { maxAge: 0 })
         })
     );
+    
+    // Wrap connect app in http.server for socket.io to work (https://github.com/senchalabs/connect/issues/500)
+    var server = HTTP.createServer(app);
 
     // If in test mode we stop when we are not pinged any more
     if (options.test)
@@ -141,7 +146,7 @@ function startServer(options)
     	}, 800);
     }
 
-    var io = SOCKET_IO.listen(app);
+    var io = SOCKET_IO.listen(server);
 
     io.set("log level", 0);
     if (options.verbose)
@@ -230,7 +235,7 @@ function startServer(options)
         });
     }); 
 
-    app.listen(options.port);
+    server.listen(options.port);
 
     SYS.puts("Launched Xdebug proxy server on port " + options.port + "\n");
 }
