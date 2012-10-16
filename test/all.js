@@ -29,13 +29,9 @@
  * 
  *   Test helper to run all test suites.
  *
- * External Dependencies:
- * 
- *   * `asyncjs` <- `../support/asyncjs/index` -> [https://github.com/ajaxorg/async.js](https://github.com/ajaxorg/async.js)
- *   
  */
 var HELPER = require("./_helper"),
-    ASYNC = require("../support/asyncjs/index");
+    ASYNC = require("asyncjs");
 
 HELPER.ready(function() {
     ASYNC.concat(

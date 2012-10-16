@@ -1,9 +1,0 @@
-[submodule "support/requirejs"]
-	path = support/requirejs
-	url = git://github.com/jrburke/requirejs.git
-[submodule "support/asyncjs"]
-	path = support/asyncjs
-	url = git://github.com/ajaxorg/async.js.git
-[submodule "support/dispatch"]
-	path = support/dispatch
-	url = git://github.com/caolan/dispatch.git
