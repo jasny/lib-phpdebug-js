@@ -28,7 +28,7 @@
  */
 
 var HELPER = require("./_helper"),
-    ASYNC = require("../support/asyncjs/index"),
+    ASYNC = require("asyncjs"),
     ASSERT = require("assert"),
     XDEBUG = require("../lib/xdebug");
 
@@ -317,7 +317,7 @@ var Test =
 
 }
 
-module.exports = require("../support/asyncjs/lib/test").testcase(Test);
+module.exports = require("asyncjs/lib/test").testcase(Test);
 
 if (module === require.main)
     HELPER.ready(function() {

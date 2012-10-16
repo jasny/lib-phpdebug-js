@@ -25,16 +25,14 @@ Requirements
   * [node.js](http://nodejs.org/) & *npm*
   * Webserver with *PHP* support
   * [PHP 5.2+](http://php.net/) *cli* and *webserver* support
-  * [Xdebug](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
+  * [Xdebug 2.2.x](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
 
 Install
 -------
 
-    npm install connect socket.io socket.io-client cli q xml2js
     git clone git://github.com/ajaxorg/lib-phpdebug.git
     cd lib-phpdebug
-    git submodule init
-    git submodule update
+    npm install
 
 Setup
 -----

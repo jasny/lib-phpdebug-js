@@ -31,15 +31,6 @@
  *   [connect](https://github.com/senchalabs/connect) + 
  *   [socket.io](https://github.com/learnboost/socket.io) based stack.
  *
- * External Dependencies:
- * 
- *   * `Q` <- `npm install q` -> [http://github.com/kriskowal/q](http://github.com/kriskowal/q)
- *   * `CLI` <- `npm install cli` -> [https://github.com/chriso/cli](https://github.com/chriso/cli)
- *   * `CONNECT` <- `npm install connect` -> [https://github.com/senchalabs/connect](https://github.com/senchalabs/connect)
- *   * `CONNECT_DISPATCH` <- `../support/dispatch` -> [https://github.com/caolan/dispatch](https://github.com/caolan/dispatch)
- *   * `SOCKET_IO` <- `npm install socket.io` -> [https://github.com/learnboost/socket.io](https://github.com/learnboost/socket.io)
- *   * `XML2JS` <- `npm install xml2js` -> [https://github.com/Leonidas-from-XIV/node-xml2js/](https://github.com/Leonidas-from-XIV/node-xml2js/)
- *   
  */
 
 const XDEBUG_PORT = 9000,
@@ -57,7 +48,7 @@ var SYS = require("sys"),
     QS = require("querystring"),
     HTTP = require('http'),
     CONNECT = require("connect"),
-    CONNECT_DISPATCH = require("../support/dispatch"),
+    CONNECT_DISPATCH = require("dispatch"),
     SOCKET_IO = require("socket.io"),
     XDEBUG = require("../lib/xdebug"),
     XDEBUG_PROXY = require("../lib/proxy"),
