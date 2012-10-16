@@ -1,0 +1,25 @@
+{
+    "name":         "lib-phpdebug",
+    "description":  "Xdebug (PHP Debugger) client written in JavaScript",
+    "version":      "0.1.0",
+    "main":         "./index.js",
+    
+    "author": {
+        "name" :        "Ajax.org B.V",
+        "email" :       "info@ajax.org"
+    },
+    
+    "keywords":     [],
+    
+    "licenses":      {
+        "type": "none"
+    },
+
+    "repository" : {
+  	  "type" : "git",
+  	  "url" : "git://github.com/ajaxorg/lib-phpdebug.git"
+    },
+    "bugs" : {
+  	  "web" : "http://github.com/ajaxorg/lib-phpdebug/issues"
+    }
+}
