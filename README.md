@@ -30,7 +30,7 @@ Requirements
 Install
 -------
 
-    git clone git://github.com/ajaxorg/lib-phpdebug.git
+    git clone git://github.com/jasny/lib-phpdebug.git
     cd lib-phpdebug
     npm install
 
@@ -76,6 +76,7 @@ Author
 ======
 
 The original implementation of this project is by [Christoph Dorn](http://www.christophdorn.com/).
+The project is maintained by [Jasny (Arnold Daniels)](http://www.jasny.net/).
 
 
 License
