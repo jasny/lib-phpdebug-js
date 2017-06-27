@@ -75,8 +75,8 @@ You can now use the client to run the test suite using the `Run All Tests` link.
 Author
 ======
 
-The original implementation of this project is by [Christoph Dorn](http://www.christophdorn.com/).
-The project is maintained by [Jasny (Arnold Daniels)](http://www.jasny.net/).
+- The original implementation of this project is by [Christoph Dorn](http://www.christophdorn.com/).
+- The project is maintained by [Jasny (Arnold Daniels)](http://www.jasny.net/).
 
 
 License
