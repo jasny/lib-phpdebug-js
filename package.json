@@ -8,6 +8,9 @@
     "main": "./index.js",
     "homepage": "http://github.com/jasny/lib-phpdebug-js",
     "author": "Ajax.org B.V. <info@ajax.org>",
+    "contibutors": [
+        "Arnold Daniels <arnold@jasny.net> (https://www.jasny.net)
+    ],
     "pm": "sm",
     "dependencies": {
         "asyncjs": "0.0.5",
@@ -23,7 +26,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "git://github.com/ajaxorg/lib-phpdebug.git"
+        "url": "git://github.com/jasny/lib-phpdebug-js.git"
     },
     "license": {
         "type": "MIT",
