@@ -24,14 +24,14 @@ Requirements
 
   * [node.js](http://nodejs.org/) & *npm*
   * Webserver with *PHP* support
-  * [PHP 5.2+](http://php.net/) *cli* and *webserver* support
+  * [PHP 5.2+ / 7.0+](http://php.net/) *cli* and *webserver* support
   * [Xdebug 2.2.x](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
 
 Install
 -------
 
-    git clone git://github.com/jasny/lib-phpdebug.git
-    cd lib-phpdebug
+    git clone git://github.com/jasny/lib-phpdebug-js.git
+    cd lib-phpdebug-js
     npm install
 
 Setup
