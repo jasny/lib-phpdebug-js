@@ -1,37 +1,35 @@
 {
-    "name":         "lib-phpdebug",
-    "description":  "Xdebug (PHP Debugger) client written in JavaScript",
-    "version":      "0.1.0",
-    "engines":      {"node": ">= 0.6.0"},
-    "main":         "./index.js",
-    "homepage" :    "http://github.com/ajaxorg/lib-phpdebug",
-    "author":       "Ajax.org B.V. <info@ajax.org>",
-    "help": {
-        "web": "https://github.com/ajaxorg/lib-phpdebug/blob/master/README.md"
+    "name": "lib-phpdebug",
+    "description": "Xdebug (PHP Debugger) client written in JavaScript",
+    "version": "1.0.0",
+    "engines": {
+        "node": ">= 6.0.0"
     },
-    
+    "main": "./index.js",
+    "homepage": "http://github.com/jasny/lib-phpdebug-js",
+    "author": "Ajax.org B.V. <info@ajax.org>",
     "pm": "sm",
     "dependencies": {
-        "connect": "2.3.0",
         "asyncjs": "0.0.5",
         "cli": "0.4.4-1",
+        "connect": "^3.7.0",
         "dispatch": "0.2.0",
         "q": "0.8.5",
         "requirejs": "2.1.1",
-        "socket.io": "0.9.6",
-        "socket.io-client": "0.9.6",
+        "serve-static": "^1.14.1",
+        "socket.io": "^2.2.0",
+        "socket.io-client": "^2.2.0",
         "xml2js": "0.1.14"
     },
-    
-    "repository" : {
-  	  "type" : "git",
-  	  "url" : "git://github.com/ajaxorg/lib-phpdebug.git"
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/ajaxorg/lib-phpdebug.git"
     },
-    "licenses": [{
-        "type": "GPLv3",
-        "url": "http://www.gnu.org/licenses/gpl-3.0.txt"
-    }],
-    "bugs" : {
-  	  "web" : "http://github.com/ajaxorg/lib-phpdebug/issues"
+    "license": {
+        "type": "MIT",
+        "url": "https://raw.githubusercontent.com/jasny/lib-phpdebug-js/master/LICENSE"
+    },
+    "bugs": {
+        "web": "http://github.com/jasny/lib-phpdebug-js/issues"
     }
 }

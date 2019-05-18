@@ -123,12 +123,16 @@ var Test =
             	// @see http://www.xdebug.org/docs-dbgp.php#context-names
                 session.sendCommand("context_names", null, null, function(args, data, raw)
                 {
-					ASSERT.equal(data.length, 2);
 					ASSERT.equal(data[0]["@"].name, "Locals");
 					ASSERT.equal(data[0]["@"].id, "0");
 					
 					ASSERT.equal(data[1]["@"].name, "Superglobals");
 					ASSERT.equal(data[1]["@"].id, "1");
+					
+          if (data.length > 2) {
+					    ASSERT.equal(data[2]["@"].name, "User defined constants");
+					    ASSERT.equal(data[2]["@"].id, "2");
+          }
 
 					// @see http://www.xdebug.org/docs-dbgp.php#context-get
 	                session.sendCommand("context_get", {"d": 0, "c": "0"}, null, function(args, data, raw)
@@ -151,7 +155,6 @@ var Test =
     						ASSERT.equal(data[4]["@"].name, "$_POST");
     						ASSERT.equal(data[5]["@"].name, "$_REQUEST");
     						ASSERT.equal(data[6]["@"].name, "$_SERVER");
-    						ASSERT.equal(data[7]["@"].name, "$GLOBALS");
     						
     		            	// @see http://www.xdebug.org/docs-dbgp.php#continuation-commands
     	                    session.sendCommand("step_over", null, null, function(args, data, raw)
@@ -182,12 +185,12 @@ var Test =
 						ASSERT.equal(data["@"].numchildren, "2");
 
 						ASSERT.equal(data.property[0]["@"].name, "key");
-						ASSERT.equal(data.property[0]["@"].fullname, "$var1['key']");
+						ASSERT.equal(data.property[0]["@"].fullname.replace(/"/g, "'"), "$var1['key']");
 						ASSERT.equal(data.property[0]["@"].type, "string");
 						ASSERT.equal(XDEBUG.base64_decode(data.property[0]["#"]), "value1");
 
 						ASSERT.equal(data.property[1]["@"].name, "items");
-						ASSERT.equal(data.property[1]["@"].fullname, "$var1['items']");
+						ASSERT.equal(data.property[1]["@"].fullname.replace(/"/g, "'"), "$var1['items']");
 						ASSERT.equal(data.property[1]["@"].type, "array");
 						ASSERT.equal(data.property[1]["@"].children, "1");
 						ASSERT.equal(data.property[1]["@"].numchildren, "2");

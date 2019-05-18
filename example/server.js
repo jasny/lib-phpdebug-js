@@ -41,13 +41,14 @@ const XDEBUG_PORT = 9000,
 //Set NODE_PATH in your environment instead (https://github.com/unconed/TermKit/issues/68)
 //require.paths.push('/usr/local/lib/node_modules');
 
-var SYS = require("sys"),
+var CONSOLE = require("console"),
     CLI = require("cli"),
     Q = require("q"),
     PATH = require("path"),
     QS = require("querystring"),
     HTTP = require('http'),
     CONNECT = require("connect"),
+    SERVE_STATIC = require('serve-static'),
     CONNECT_DISPATCH = require("dispatch"),
     SOCKET_IO = require("socket.io"),
     XDEBUG = require("../lib/xdebug"),
@@ -81,9 +82,9 @@ CLI.main(function(args, options)
 
 function startServer(options)
 {
-	var lastPing = false;
+    var lastPing = false;
 
-    var app = CONNECT.createServer(
+    var server = HTTP.createServer(
 
         CONNECT_DISPATCH({
 
@@ -119,12 +120,12 @@ function startServer(options)
                 }
             },
 
-            "/.*": CONNECT.static(__dirname + '/client', { maxAge: 0 })
+            "/.*": SERVE_STATIC(__dirname + '/client', { maxAge: 0 })
         })
     );
     
     // Wrap connect app in http.server for socket.io to work (https://github.com/senchalabs/connect/issues/500)
-    var server = HTTP.createServer(app);
+    //var server = HTTP.createServer(app);
 
     // If in test mode we stop when we are not pinged any more
     if (options.test)
@@ -138,12 +139,6 @@ function startServer(options)
     }
 
     var io = SOCKET_IO.listen(server);
-
-    io.set("log level", 0);
-    if (options.verbose)
-        io.set("log level", 2);
-    if (options.debug)
-        io.set("log level", 3);
 
     // Initialize and hook in the debug proxy server so it can
     // communicate via `socket.io`.
@@ -218,7 +213,7 @@ function startServer(options)
             var command = "node " +  PATH.normalize(__dirname + "/../test/all --port " + options.port + " --php " + options.php);
             EXEC(command, function (error, stdout, stderr)
             {
-                SYS.puts("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
+                CONSOLE.log("[proxyServer] " + stdout.split("\n").join("\n[proxyServer] ") + "\n");
             });
         });
         socket.emit("init", {
@@ -228,7 +223,7 @@ function startServer(options)
 
     server.listen(options.port);
 
-    SYS.puts("Launched Xdebug proxy server on port " + options.port + "\n");
+    CONSOLE.log("Launched Xdebug proxy server on port " + options.port + "\n");
 }
 
 function runBrowserTest(test, timeout)

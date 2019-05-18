@@ -1,8 +1,6 @@
 Xdebug (PHP Debugger) client written in JavaScript
 ==================================================
 
-*Status: dev*
-
 This project includes:
 
   * An implementation of the [DBGP Protocol](http://www.xdebug.org/docs-dbgp.php):
@@ -25,7 +23,7 @@ Requirements
   * [node.js](http://nodejs.org/) & *npm*
   * Webserver with *PHP* support
   * [PHP 5.2+ / 7.0+](http://php.net/) *cli* and *webserver* support
-  * [Xdebug 2.2.x](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
+  * [Xdebug 2.2+](http://www.xdebug.org/) (see [Xdebug Install](http://www.xdebug.org/docs/install))
 
 Install
 -------
