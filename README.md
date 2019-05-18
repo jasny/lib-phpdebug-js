@@ -28,6 +28,10 @@ Requirements
 Install
 -------
 
+    npm install lib-phpdebug
+
+From source
+
     git clone git://github.com/jasny/lib-phpdebug-js.git
     cd lib-phpdebug-js
     npm install
